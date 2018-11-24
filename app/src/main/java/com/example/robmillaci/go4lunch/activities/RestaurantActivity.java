@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -33,8 +32,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.jsoup.Connection;
 
 import java.util.ArrayList;
 
@@ -266,9 +263,9 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
      * @param tab the tab clicked
      */
     private void like(TabLayout.Tab tab) {
-        if (tab.getTag() == null) {
-            tab.setTag(MARKER_UNSELECTED);
-        } else {
+        if (tab.getTag() == null) tab.setTag(MARKER_UNSELECTED);
+        
+        if (tab.getTag() != null) {
             switch (tab.getTag().toString()) {
                 case MARKER_UNSELECTED:
                     tab.setIcon(R.drawable.start_selected);
@@ -284,6 +281,8 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
             }
         }
     }
+
+
 
 
     /**
