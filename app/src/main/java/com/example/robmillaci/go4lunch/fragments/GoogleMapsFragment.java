@@ -567,6 +567,40 @@ public class GoogleMapsFragment extends Fragment implements
         }
     }
 
+    //Refresh all the markers currently on the map to account for any changes
+    private void refreshMarkers() {
+        if (mGoogleMap != null) {
+            mGoogleMap.clear();
+            Marker marker;
+            MarkerOptions mOptions;
+
+            for (String markerId : allMarkers.keySet()) {
+                Marker thisMarker = allMarkers.get(markerId);
+
+                if (selectedMarkers.contains(thisMarker)) { //if this is a selected marker re-add the marker with the icon set to marker_green
+                    mOptions = new MarkerOptions()
+                            .position(mPlaces.get(markerId).getLocation())
+                            .title(mPlaces.get(markerId).getName())
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_green));
+                    marker = mGoogleMap.addMarker(mOptions);
+                    marker.setTag(MARKER_SELECTED);
+                } else {//if this is not a selected marker re-add the marker with the icon set to marker_orange
+                    mOptions = new MarkerOptions()
+                            .position(mPlaces.get(markerId).getLocation())
+                            .title(mPlaces.get(markerId).getName())
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
+                    marker = mGoogleMap.addMarker(mOptions);
+                    marker.setTag(MARKER_UNSELECTED);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshMarkers(); //take account of any marker changes when this fragment is resumed
+    }
 
     public static HashMap<String, PojoPlace> getmPlaces() {
         return mPlaces;
@@ -587,6 +621,7 @@ public class GoogleMapsFragment extends Fragment implements
     public static HashMap<String, Marker> getAllMarkers() {
         return allMarkers;
     }
+
 
     //unused interface methods
     @Override
@@ -612,6 +647,10 @@ public class GoogleMapsFragment extends Fragment implements
 
     }
 
+    @Override
+    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
+
+    }
 }
 
 interface IgooglePlacescallback {

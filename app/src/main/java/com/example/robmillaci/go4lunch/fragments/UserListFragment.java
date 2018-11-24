@@ -241,4 +241,9 @@ public class UserListFragment extends Fragment implements FirebaseHelper.firebas
     @Override
     public void finishedGettingLikedRestaurants(ArrayList<String> places) {
     }
+
+    @Override
+    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
+
+    }
 }

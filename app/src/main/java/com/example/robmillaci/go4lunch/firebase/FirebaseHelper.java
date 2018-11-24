@@ -1,7 +1,9 @@
 package com.example.robmillaci.go4lunch.firebase;
 
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
@@ -248,7 +250,7 @@ public class FirebaseHelper {
                     sb.append(placeID);
                     try {
                         //noinspection ConstantConditions
-                        String likedPlaces = taskResults.get("likedPlaces").toString();
+                        String likedPlaces = taskResults.get(DATABASE_LIKED_RESTAURANTS_FIELD).toString();
                         String[] likedPlacesArray = likedPlaces.split(",");
 
                         for (String s : likedPlacesArray) {
@@ -267,25 +269,40 @@ public class FirebaseHelper {
         });
     }
 
-    public void isItLiked(final String id) {
-        FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(getmCurrentUserId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+
+    public void isPlaceSelected(final String placeId, final String[]users) {
+        FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
-                    DocumentSnapshot taskResults = task.getResult();
-                    try {
-                        @SuppressWarnings("ConstantConditions") String likedPlaces = taskResults.get(DATABASE_LIKED_RESTAURANTS_FIELD).toString();
-                        String[] likedPlacesArray = likedPlaces.split(",");
-                        for (String s : likedPlacesArray) {
-                            if (s.equals(id)) {
-                                mFirebaseDataCallback.isItLikedCallback(true);
-                                return;
+                    QuerySnapshot taskResults = task.getResult();
+                    ArrayList<String> addedUsers = new ArrayList<>(Arrays.asList(users));
+                    if (taskResults != null) {
+                        ArrayList<String> usersSelectedThisPlace = new ArrayList<>();
+                        List<DocumentSnapshot> documents = taskResults.getDocuments();
+
+                        for (DocumentSnapshot d : documents) {
+                            String selectedPlace = (String) d.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD);
+                            String uniqueID = (String) d.get(DATABASE_UNIQUE_ID_FIELD);
+                            if(placeId.equals(selectedPlace) && addedUsers.contains(uniqueID)){
+                                usersSelectedThisPlace.add(uniqueID);
                             }
                         }
 
-                    } catch (Exception e) {
-                        mFirebaseDataCallback.isItLikedCallback(false);
-                        e.printStackTrace();
+                        if(usersSelectedThisPlace.size() > 0){
+                            if(usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size()>1){
+                                mFirebaseDataCallback.isPlaceSelected(true,true);
+                            }else if(usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() == 1){
+                                mFirebaseDataCallback.isPlaceSelected(true,false);
+                            }else if(!usersSelectedThisPlace.contains(mCurrentUserId)){
+                                mFirebaseDataCallback.isPlaceSelected(false,true);
+                            }else {
+                                mFirebaseDataCallback.isPlaceSelected(false,false);
+                            }
+                        }else {
+                            mFirebaseDataCallback.isPlaceSelected(false,false);
+                        }
+
                     }
                 }
             }
@@ -332,6 +349,31 @@ public class FirebaseHelper {
         });
     }
 
+
+    public void isItLiked(final String id) {
+        FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(getmCurrentUserId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot taskResults = task.getResult();
+                    try {
+                        @SuppressWarnings("ConstantConditions") String likedPlaces = taskResults.get(DATABASE_LIKED_RESTAURANTS_FIELD).toString();
+                        String[] likedPlacesArray = likedPlaces.split(",");
+                        for (String s : likedPlacesArray) {
+                            if (s.equals(id)) {
+                                mFirebaseDataCallback.isItLikedCallback(true);
+                                return;
+                            }
+                        }
+
+                    } catch (Exception e) {
+                        mFirebaseDataCallback.isItLikedCallback(false);
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
 
     public void getLikedRestaurants() {
         final ArrayList<String> places = new ArrayList<>();
@@ -571,6 +613,7 @@ public class FirebaseHelper {
     }
 
 
+
     public interface firebaseDataCallback {
         void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v);
 
@@ -585,6 +628,8 @@ public class FirebaseHelper {
         void isItLikedCallback(boolean response);
 
         void finishedGettingLikedRestaurants(ArrayList<String> places);
+
+        void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace);
     }
 
     public interface chatData {

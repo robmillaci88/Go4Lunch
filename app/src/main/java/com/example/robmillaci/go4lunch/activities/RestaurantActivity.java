@@ -52,6 +52,8 @@ public class RestaurantActivity extends AppCompatActivity implements IphotoDownl
     private String phoneNumber; //The phone number of the place
     private String webaddress; //the web url of the place
     private String placeID; //the ID of the place
+    private boolean isItSelected = false; //is this place selected by the user
+    private boolean isItSelectedByOthers = false; //this place is selected by other users
 
     private ImageView image; //The image of the place
     private FloatingActionButton selectedFab; //The action button to 'select' this place
@@ -94,7 +96,8 @@ public class RestaurantActivity extends AppCompatActivity implements IphotoDownl
         starLikeTab = tabs.getTabAt(1); //The tab to 'like' this place
 
         Bundle data = getIntent().getExtras();
-        if (data != null) mPojoPlace = (PojoPlace) data.getSerializable(PLACE_SERIALIZABLE_KEY); //Restore the place passed to this activity in the calling intent
+        if (data != null)
+            mPojoPlace = (PojoPlace) data.getSerializable(PLACE_SERIALIZABLE_KEY); //Restore the place passed to this activity in the calling intent
 
         if (mPojoPlace != null) {
             mMarker = GoogleMapsFragment.getSpecificMarker(mPojoPlace.getName()); //Retrieve the specific marker for this place
@@ -122,53 +125,42 @@ public class RestaurantActivity extends AppCompatActivity implements IphotoDownl
             location = mPojoPlace.getLocation();
         }
 
-
         getAdditionalPlaceData(); //see method comments
 
-
-        // get the marker tag and adjust the UI as appropriate
-        String markerTag;
-        try {
-            //noinspection ConstantConditions
-            markerTag = mMarker.getTag().toString();
-        } catch (Exception e) {
-            markerTag = MARKER_UNSELECTED;
-        }
-
-        if (markerTag.equals(MARKER_SELECTED)) {
-            selectedFab.setImageResource(R.drawable.checked);
-        } else {
-            selectedFab.setImageResource(R.drawable.add_restaurant);
-        }
+        firebaseHelper.getAddedUsers(); //get this users added friends so we can check if any of them have selected this place. Callsback to 'finishedGettingUsers'
 
         selectedFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mMarker.getTag().toString().equals(MARKER_UNSELECTED)) {
+                if (!isItSelected) {
                     /*
-                    if the marker is unselected, set the tag to 'selected'
+                    if the place is unselected, set the marker tag to 'selected'
                     Change the marker drawable to green (to display it is selected)
                     Update the database with the new selected place by calling firebasehelper.getSelectedPlace()
                      */
-
                     selectedFab.setImageResource(R.drawable.checked);
                     mMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_green));
                     mMarker.setTag(MARKER_SELECTED);
-
+                    isItSelected = true;
                     firebaseHelper.getSelectedPlace(FirebaseHelper.getmCurrentUserId(), null); //method calls back to 'finishedGettingPlace'
 
-                } else if (mMarker.getTag().toString().equals(MARKER_SELECTED)) {
+                } else {
                     /*
-                    if the marker is selected, set the tag to 'unselected'
-                    Change the marker drawable to orange (to display it is not selected)
+                    if the place is selected, set the marker tag to 'unselected'
+                    Change the marker drawable to orange (to display it is not selected) as long as this place is NOT selected by other friends
                     Update the database, removing the selected place by calling firebasehelper.deleteField
                      */
-
                     selectedFab.setImageResource(R.drawable.add_restaurant);
-                    mMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
-                    mMarker.setTag(MARKER_UNSELECTED);
                     FirebaseHelper.deleteField(DATABASE_SELECTED_RESTAURANT_FIELD);
                     FirebaseHelper.deleteField(DATABASE_SELECTED_RESTAURANT_ID_FIELD);
+
+                    firebaseHelper.getUsersEatingHere(mPojoPlace.getId(), null); //now we have unselected this place, refresh the list of users 'eating here'
+
+                    if (!isItSelectedByOthers) { //we only want to change the markers tag and icon is no other friends have selected this place
+                        mMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
+                        mMarker.setTag(MARKER_UNSELECTED);
+                    }
+                    isItSelected = false;
                 }
             }
         });
@@ -319,9 +311,8 @@ public class RestaurantActivity extends AppCompatActivity implements IphotoDownl
     }
 
 
-
     /**
-     * Updates the database with the newly selected place
+     * Updates the database with the newly selected place and refresh the users 'eating here'
      *
      * @param myviewHolder the viewholder returned for updating if this method calls back to a RecyclerView class
      * @param s            the returned place name
@@ -330,9 +321,11 @@ public class RestaurantActivity extends AppCompatActivity implements IphotoDownl
     @Override
     public void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId) {
         FirebaseHelper firebasehelper = new FirebaseHelper(RestaurantActivity.this);
-        firebasehelper.addSelectedMarker(mMarker.getTitle(), placeID, s);
-    }
 
+        firebasehelper.addSelectedMarker(mMarker.getTitle(), placeID, s);
+        //now the field is deleted we can refresh the 'users eating here'
+        firebaseHelper.getUsersEatingHere(mPojoPlace.getId(), null); //now we have unselected this place, refresh the list of users 'eating here'
+    }
 
 
     /**
@@ -368,9 +361,28 @@ public class RestaurantActivity extends AppCompatActivity implements IphotoDownl
         }
     }
 
+    /**
+     * callback from {@link FirebaseHelper#isPlaceSelected(String, String[])} to determine if any friends or the current user has selected this place
+     *
+     * @param currentUserSelectedPlace true if the current logged in user has selected this place
+     * @param otherUsersSelectedPlace  true if any of the current logged in users friends have selected this place
+     */
+    @Override
+    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
+        if (currentUserSelectedPlace) {
+            selectedFab.setImageResource(R.drawable.checked);
+            isItSelected = true;
+        } else {
+            selectedFab.setImageResource(R.drawable.add_restaurant);
+            isItSelected = false;
+        }
+        isItSelectedByOthers = otherUsersSelectedPlace;
+    }
+
 
     /**
      * callback from {@link com.example.robmillaci.go4lunch.web_service.HtmlParser} to update the UI with the place detaild type
+     *
      * @param value the returned objects from this method
      */
     @Override
@@ -387,6 +399,8 @@ public class RestaurantActivity extends AppCompatActivity implements IphotoDownl
 
     @Override
     public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
+        //now we have the added friends ID's we can check if any of them have selected this place
+        firebaseHelper.isPlaceSelected(placeID, users);
     }
 
     @Override

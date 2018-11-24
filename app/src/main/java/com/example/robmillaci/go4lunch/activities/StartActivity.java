@@ -40,6 +40,9 @@ import com.google.firebase.iid.InstanceIdResult;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_SELECTED_RESTAURANT_FIELD;
+import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_SELECTED_RESTAURANT_ID_FIELD;
+
 /**
  * This class created the first activity presented to a new user<br>
  * It deals with authenticating the user via Facebook or Google and handles the login event
@@ -272,6 +275,7 @@ public class StartActivity extends AppCompatActivity {
         data.put("uniqueID", fbUser.getUid());
         mFirebaseDatabase.collection("users").document(fbUser.getUid()).set(data);
 
+
         FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
             @Override
             public void onComplete(@NonNull Task<InstanceIdResult> task) {
@@ -296,6 +300,8 @@ public class StartActivity extends AppCompatActivity {
         data.put("userEmail", "Kirsten.new@hotmail.com");
         data.put("picture", ("https://images.pexels.com/photos/762020/pexels-photo-762020.jpeg?auto=compress&cs=tinysrgb&h=350"));
         data.put("uniqueID", "QFWSVSRGJMWEOIMWOFIMWEF");
+        data.put(DATABASE_SELECTED_RESTAURANT_FIELD, "The Weighbridge Brewhouse");
+        data.put(DATABASE_SELECTED_RESTAURANT_ID_FIELD, "ChIJb0cuAGxEcUgRaV_mqIUnpRI");
 
         mFirebaseDatabase.collection("users").document("QFWSVSRGJMWEOIMWOFIMWEF").set(data);
 
@@ -304,6 +310,8 @@ public class StartActivity extends AppCompatActivity {
         data.put("userEmail", "Dena.Millaci@hotmail.com");
         data.put("picture", ("https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&h=350"));
         data.put("uniqueID", "sdfagegbaerbq34gwrvrv");
+        data.put(DATABASE_SELECTED_RESTAURANT_FIELD, " Los Gatos");
+        data.put(DATABASE_SELECTED_RESTAURANT_ID_FIELD, "ChIJ1y_-JlJEcUgRINTTRuk-g7s");
 
         mFirebaseDatabase.collection("users").document("sdfagegbaerbq34gwrvrv").set(data);
 
@@ -313,6 +321,8 @@ public class StartActivity extends AppCompatActivity {
         data.put("userEmail", "P.Taylor@hotmail.com");
         data.put("picture", ("https://previews.123rf.com/images/ostill/ostill1505/ostill150500232/39958303-one-man-mature-handsome-man-toothy-smile-portrait-studio-white-background.jpg"));
         data.put("uniqueID", "sdfsdfsfwefqw3r23r2352353fsv");
+        data.put(DATABASE_SELECTED_RESTAURANT_FIELD, "The Weighbridge Brewhouse");
+        data.put(DATABASE_SELECTED_RESTAURANT_ID_FIELD, "ChIJb0cuAGxEcUgRaV_mqIUnpRI");
 
         mFirebaseDatabase.collection("users").document("sdfsdfsfwefqw3r23r2352353fsv").set(data);
 
@@ -322,6 +332,8 @@ public class StartActivity extends AppCompatActivity {
         data.put("userEmail", "Brown.J@hotmail.com");
         data.put("picture", ("https://vignette.wikia.nocookie.net/creepypasta/images/6/6c/7268969-Portrait-of-happy-smiling-man-isolated-on-white-Stock-Photo-face.jpg/revision/latest?cb=20161109170616"));
         data.put("uniqueID", "bnvbnmvmbvnmbvnmgfhjgfym");
+        data.put(DATABASE_SELECTED_RESTAURANT_FIELD, "The Steam Railway Co");
+        data.put(DATABASE_SELECTED_RESTAURANT_ID_FIELD, "ChIJ7V7hwFNEcUgR8u-zcLMVl2s");
 
         mFirebaseDatabase.collection("users").document("bnvbnmvmbvnmbvnmgfhjgfym").set(data);
 
@@ -331,6 +343,8 @@ public class StartActivity extends AppCompatActivity {
         data.put("userEmail", "P.F@hotmail.com");
         data.put("picture", ("https://media.gettyimages.com/photos/closeup-of-smiling-man-on-white-background-picture-id482907157?b=1&k=6&m=482907157&s=612x612&w=0&h=Z8AYyf6JCW0dQY5e5SgG9wLPoPMTVur7HapjohqpWFc="));
         data.put("uniqueID", "rtyrtytrytrycbcbergbdrsg");
+        data.put(DATABASE_SELECTED_RESTAURANT_FIELD, " Los Gatos");
+        data.put(DATABASE_SELECTED_RESTAURANT_ID_FIELD, "ChIJ1y_-JlJEcUgRINTTRuk-g7s");
 
         mFirebaseDatabase.collection("users").document("rtyrtytrytrycbcbergbdrsg").set(data);
 
@@ -340,6 +354,8 @@ public class StartActivity extends AppCompatActivity {
         data.put("userEmail", "JMorse@hotmail.com");
         data.put("picture", ("https://images.pexels.com/photos/372042/pexels-photo-372042.jpeg?auto=compress&cs=tinysrgb&h=350"));
         data.put("uniqueID", "rtyrtytrytrycbcbergbdrsg");
+        data.put(DATABASE_SELECTED_RESTAURANT_FIELD, "The Weighbridge Brewhouse");
+        data.put(DATABASE_SELECTED_RESTAURANT_ID_FIELD, "ChIJb0cuAGxEcUgRaV_mqIUnpRI");
 
         mFirebaseDatabase.collection("users").document("tytytytytytytytytytytytytytytyt").set(data);
 
@@ -349,6 +365,8 @@ public class StartActivity extends AppCompatActivity {
         data.put("userEmail", "DottyT@hotmail.com");
         data.put("picture", ("https://thumb1.shutterstock.com/mosaic_250/2967241/776697943/stock-photo-pretty-smiling-joyfully-female-with-fair-hair-dressed-casually-looking-with-satisfaction-at-776697943.jpg"));
         data.put("uniqueID", "xcvxcvxcvxcvxcv1213213213sdfsdf");
+        data.put(DATABASE_SELECTED_RESTAURANT_FIELD, "DaVinci Italian Restaurant");
+        data.put(DATABASE_SELECTED_RESTAURANT_ID_FIELD, "ChIJ5TL7IEdEcUgR-DR8N0XpUXU");
 
         mFirebaseDatabase.collection("users").document("bbbbbvvvvvvvvcccccc45454cdd").set(data);
     }

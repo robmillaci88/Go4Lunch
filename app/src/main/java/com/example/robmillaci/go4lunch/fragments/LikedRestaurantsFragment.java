@@ -112,8 +112,13 @@ public class LikedRestaurantsFragment extends Fragment implements FirebaseHelper
                     p.getWebsiteUri().toString(), p.getPhoneNumber().toString(),
                     "", p.getRating(), p.getId(), p.getLatLng().latitude, p.getLatLng().longitude, LIKED_RESTAURANT_FRAGMENT));
         }
-        placesBuffer.close();
+        if (placesBuffer != null) {
+            placesBuffer.close();
+        }
 
+        if (Pojoplaces.size() == 0){
+            likedRecyclerView.setBackgroundResource(R.drawable.no_liked_places_found);
+        }
         mAdaptor = new RestaurantListAdapter(Pojoplaces, GoogleMapsFragment.getCurrentlocation(), placesBuffer, getContext());
         likedRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         RecyclerViewMods.setAnimation(likedRecyclerView);
@@ -149,6 +154,11 @@ public class LikedRestaurantsFragment extends Fragment implements FirebaseHelper
 
     @Override
     public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
+
+    }
+
+    @Override
+    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
 
     }
 

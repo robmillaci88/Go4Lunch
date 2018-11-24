@@ -488,4 +488,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void finishedGettingLikedRestaurants(ArrayList<String> places) {
     }
+
+    @Override
+    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
+
+    }
 }

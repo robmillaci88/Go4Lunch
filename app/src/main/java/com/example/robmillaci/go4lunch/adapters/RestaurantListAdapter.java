@@ -443,4 +443,8 @@ public class RestaurantListAdapter extends RecyclerView.Adapter<RestaurantListAd
     public void finishedGettingLikedRestaurants(ArrayList<String> places) {
     }
 
+    @Override
+    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
+
+    }
 }

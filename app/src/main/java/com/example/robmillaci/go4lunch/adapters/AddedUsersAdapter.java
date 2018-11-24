@@ -378,6 +378,8 @@ public class AddedUsersAdapter extends RecyclerView.Adapter<AddedUsersAdapter.My
 
     }
 
+    @Override
+    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
 
-
+    }
 }

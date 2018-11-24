@@ -219,4 +219,9 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.Myvi
     @Override
     public void finishedGettingLikedRestaurants(ArrayList<String> places) {
     }
+
+    @Override
+    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
+
+    }
 }
