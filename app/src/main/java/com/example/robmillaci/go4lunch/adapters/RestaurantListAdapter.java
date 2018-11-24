@@ -56,8 +56,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * This class is responsible for creating the adaptor to display chat data to users
  * Contains a list of {@link PojoPlace}
  */
-public class RestaurantListAdapter extends RecyclerView.Adapter<RestaurantListAdapter.MyviewHolder> implements IphotoDownloadedCallback,
-        FirebaseHelper.firebaseDataCallback,
+public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDownloadedCallback,
         IhtmlParser,
         Filterable {
 
@@ -107,12 +106,13 @@ public class RestaurantListAdapter extends RecyclerView.Adapter<RestaurantListAd
 
 
     @Override
-    public void onBindViewHolder(@NonNull final MyviewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
         final PojoPlace pojoPlace = mPojoPlaceArray.get(holder.getAdapterPosition()); //the PojoPlace related to the adapters position
-        holder.rest_title.setText(pojoPlace.getName()); //Set the pojoPlace title
-        holder.phoneNumber.setText(pojoPlace.getPhoneNumber()); //set the pojoPlace phone number
-        holder.ratingBar.setRating(pojoPlace.getRating()); //set the pojoPlace rating
-        holder.vicinity.setText(String.format("%s - %s", pojoPlace.getPlaceType()
+        MyviewHolder myviewHolder = (MyviewHolder)holder;
+        myviewHolder.rest_title.setText(pojoPlace.getName()); //Set the pojoPlace title
+        myviewHolder.phoneNumber.setText(pojoPlace.getPhoneNumber()); //set the pojoPlace phone number
+        myviewHolder.ratingBar.setRating(pojoPlace.getRating()); //set the pojoPlace rating
+        myviewHolder.vicinity.setText(String.format("%s - %s", pojoPlace.getPlaceType()
                 , pojoPlace.getAddress())); //set the pojoPlace type, additional information for pojoPlace type is retrieved below and updated once complete
 
         if (!pojoPlace.isPlaceParsed()) { //if the pojoPlace is already parsed to determine its detailed pojoPlace type, the handle is skipped
@@ -127,12 +127,12 @@ public class RestaurantListAdapter extends RecyclerView.Adapter<RestaurantListAd
         }
 
         //see getAdditionalPlaceData method
-        getAdditionalPlaceData(pojoPlace.getId(), holder);
+        getAdditionalPlaceData(pojoPlace.getId(), myviewHolder);
 
 
         Uri websiteUrl = Uri.parse(pojoPlace.getWebsite());
         if (websiteUrl != null) {
-            holder.website.setText(pojoPlace.getWebsite()); //set the places website
+            myviewHolder.website.setText(pojoPlace.getWebsite()); //set the places website
         }
 
 
@@ -152,10 +152,10 @@ public class RestaurantListAdapter extends RecyclerView.Adapter<RestaurantListAd
             float distance = locA.distanceTo(locB);
             int distanceInt = (int) distance;
 
-            holder.distance.setText(String.format("%sm", String.valueOf(distanceInt)));
+            myviewHolder.distance.setText(String.format("%sm", String.valueOf(distanceInt)));
         } catch (Exception e) {
             e.printStackTrace();
-            holder.distance.setText(R.string.not_available);
+            myviewHolder.distance.setText(R.string.not_available);
         }
 
 
@@ -165,7 +165,7 @@ public class RestaurantListAdapter extends RecyclerView.Adapter<RestaurantListAd
 
 
         //set the onclick listener for the reviews button
-        holder.reviews.setOnClickListener(new View.OnClickListener() {
+        myviewHolder.reviews.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent reviewActivity = new Intent(mContext, ReviewsActivity.class);
@@ -413,38 +413,5 @@ public class RestaurantListAdapter extends RecyclerView.Adapter<RestaurantListAd
         } else {
             ((MyviewHolder) v).numberOfEaters.setText(String.format(mContext.getString(R.string.friends), NO_USERS));
         }
-    }
-
-
-
-    //unused interface methods
-
-    @Override
-    public void datadownloadedcallback(ArrayList<Object> arrayList) {
-    }
-
-    @Override
-    public void workUsersDataCallback(ArrayList<Users> arrayList) {
-    }
-
-    @Override
-    public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
-    }
-
-    @Override
-    public void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId) {
-    }
-
-    @Override
-    public void isItLikedCallback(boolean response) {
-    }
-
-    @Override
-    public void finishedGettingLikedRestaurants(ArrayList<String> places) {
-    }
-
-    @Override
-    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
-
     }
 }

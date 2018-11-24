@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,7 +28,6 @@ import com.example.robmillaci.go4lunch.activities.RestaurantActivity;
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
 import com.example.robmillaci.go4lunch.adapters.UsersListAdapter;
 import com.example.robmillaci.go4lunch.data_objects.PojoPlace;
-import com.example.robmillaci.go4lunch.data_objects.Users;
 import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.example.robmillaci.go4lunch.utils.GooglePlacesAutoComplete;
 import com.example.robmillaci.go4lunch.web_service.GoogleAPIServices;
@@ -77,9 +74,9 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * Also contains a search view and google Autocomplete API<br>
  * Contains HashMaps of {@link PojoPlace} and {@link Marker}
  */
-public class GoogleMapsFragment extends Fragment implements
+public class GoogleMapsFragment extends BaseFragment implements
         GoogleMap.OnMarkerClickListener,
-        FirebaseHelper.firebaseDataCallback, Filterable {
+        Filterable {
 
     private static HashMap<String, PojoPlace> mPlaces; //Map of places
     private static HashMap<String, Marker> allMarkers; //Map of all markers
@@ -622,35 +619,6 @@ public class GoogleMapsFragment extends Fragment implements
         return allMarkers;
     }
 
-
-    //unused interface methods
-    @Override
-    public void datadownloadedcallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void workUsersDataCallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
-
-    }
-
-    @Override
-    public void isItLikedCallback(boolean response) {
-
-    }
-
-    @Override
-    public void finishedGettingLikedRestaurants(ArrayList<String> places) {
-
-    }
-
-    @Override
-    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
-
-    }
 }
 
 interface IgooglePlacescallback {

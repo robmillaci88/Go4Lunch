@@ -40,7 +40,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * This class is responsible for creating the adaptor to display added users
  *
  */
-public class AddedUsersAdapter extends RecyclerView.Adapter<AddedUsersAdapter.MyviewHolder> implements Filterable, FirebaseHelper.firebaseDataCallback {
+public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
     private ArrayList<Users> mUsersArrayList; //The list of added users
     private ArrayList<Users> filteredUsersList; //the list to hold the filter results
     private final ArrayList<Users> originalArray; //ArrayList to keep track of the original users array. Used when filtering
@@ -67,21 +67,22 @@ public class AddedUsersAdapter extends RecyclerView.Adapter<AddedUsersAdapter.My
 
     @Override
     public void onBindViewHolder(
-            @NonNull final AddedUsersAdapter.MyviewHolder holder, final int position) {
+            @NonNull final RecyclerView.ViewHolder holder, final int position) {
 
+        final MyviewHolder myviewHolder = (MyviewHolder)holder;
         final Users user = mUsersArrayList.get(holder.getAdapterPosition()); //The user to be displayed this the relevant position
-        holder.username.setText(user.getUsername()); //set the username
-        holder.userEmail.setText(user.getUserEmail()); //set the user email
+        myviewHolder.username.setText(user.getUsername()); //set the username
+        myviewHolder.userEmail.setText(user.getUserEmail()); //set the user email
 
         FirebaseHelper firebaseHelper = new FirebaseHelper(this);
-        firebaseHelper.getSelectedPlace(user.getUserID(), holder); //get the users selected place to display where they are eating. Callback to gotSelectedPlaces
+        firebaseHelper.getSelectedPlace(user.getUserID(), myviewHolder); //get the users selected place to display where they are eating. Callback to gotSelectedPlaces
 
-        firebaseHelper.checkNewNotifications(user.getUserID(), holder); //Checks wether the user has new notifications from the displayed user
+        firebaseHelper.checkNewNotifications(user.getUserID(), myviewHolder); //Checks wether the user has new notifications from the displayed user
 
         try {
-            Picasso.get().load(user.getUserPic()).into(holder.userPicture); //load the users picture into the view
+            Picasso.get().load(user.getUserPic()).into(myviewHolder.userPicture); //load the users picture into the view
         } catch (Exception e) {
-            holder.userPicture.setImageResource(R.drawable.com_facebook_profile_picture_blank_portrait);
+            myviewHolder.userPicture.setImageResource(R.drawable.com_facebook_profile_picture_blank_portrait);
         }
 
 
@@ -90,7 +91,7 @@ public class AddedUsersAdapter extends RecyclerView.Adapter<AddedUsersAdapter.My
          Sets the onclickListener for the chat button <br>
          Passes the id of the user receiving the messages as well as their name and picture. Also passes the picture of the user sending the messages
         */
-        holder.chat.setOnClickListener(new View.OnClickListener() {
+        myviewHolder.chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent chatIntent = new Intent(mContext, ChatActivity.class);
@@ -100,7 +101,7 @@ public class AddedUsersAdapter extends RecyclerView.Adapter<AddedUsersAdapter.My
                 chatIntent.putExtra(ChatActivity.CURRENT_USER_PIC, FirebaseHelper.getmCurrentUserPicUrl());
                 FirebaseHelper.removeChatNotification(user.getUserID());
 
-                holder.chat.setImageDrawable(mContext.getResources().getDrawable(R.drawable.chat));
+                myviewHolder.chat.setImageDrawable(mContext.getResources().getDrawable(R.drawable.chat));
                 mContext.startActivity(chatIntent);
             }
         });
@@ -111,7 +112,7 @@ public class AddedUsersAdapter extends RecyclerView.Adapter<AddedUsersAdapter.My
         /*
         Sets the onClickListener for the deleteFriend button. Creates an alert dialog to confirm deletion
          */
-        holder.deleteFriend.setOnClickListener(new View.OnClickListener() {
+        myviewHolder.deleteFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder confirmDialog = new AlertDialog.Builder(mContext);
@@ -353,33 +354,4 @@ public class AddedUsersAdapter extends RecyclerView.Adapter<AddedUsersAdapter.My
 
     }
 
-
-
-    //Unused interface methods
-    @Override
-    public void workUsersDataCallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
-    }
-
-    @Override
-    public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
-    }
-
-    @Override
-    public void isItLikedCallback(boolean response) {
-
-    }
-
-    @Override
-    public void finishedGettingLikedRestaurants(ArrayList<String> places) {
-
-    }
-
-    @Override
-    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
-
-    }
 }

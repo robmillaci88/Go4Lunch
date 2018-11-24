@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
@@ -29,11 +30,12 @@ import static com.example.robmillaci.go4lunch.activities.MainActivity.LIKED_REST
 
 /**
  * This fragment is responsible for creating and displaying the users liked restaurants<br>
- * Builds the likedRestaurants using {@link #buildLikedRestaurants()} which calles {@link FirebaseHelper#getLikedRestaurants()}
+ * Builds the likedRestaurants using {@link #buildLikedRestaurants()} which calls {@link FirebaseHelper#getLikedRestaurants()}
  */
-public class LikedRestaurantsFragment extends Fragment implements FirebaseHelper.firebaseDataCallback, IgooglePlacescallback {
+public class LikedRestaurantsFragment extends BaseFragment implements IgooglePlacescallback {
     private RecyclerView likedRecyclerView;
     private RestaurantListAdapter mAdaptor;
+    private ImageView noLikedRestaurants;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,14 +54,20 @@ public class LikedRestaurantsFragment extends Fragment implements FirebaseHelper
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         likedRecyclerView = view.findViewById(R.id.likedRecyclerView);
+        noLikedRestaurants = view.findViewById(R.id.no_liked_places_found);
         setHasOptionsMenu(true);
         buildLikedRestaurants(); //see class docs
     }
 
+
+    /**
+     * Calls {@link FirebaseHelper#getLikedRestaurants()} which calls back to {@link #finishedGettingLikedRestaurants(ArrayList)}
+     */
     private void buildLikedRestaurants() {
         FirebaseHelper firebaseHelper = new FirebaseHelper(this);
         firebaseHelper.getLikedRestaurants(); //see class docs
     }
+
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
@@ -98,7 +106,7 @@ public class LikedRestaurantsFragment extends Fragment implements FirebaseHelper
 
     /**
      * Callback from {@link GoogleMapsFragment#getPlaceById(ArrayList, IgooglePlacescallback)}
-     * Converts the googlePlaces return inti PojoPlaces
+     * Converts the googlePlaces return inti PojoPlaces and creates and sets the recyclerview adapter to display liked places
      * * @param places the list of the returned places
      *
      * @param placesBuffer the placeBufferResponse so we can close it once we are finished
@@ -116,13 +124,15 @@ public class LikedRestaurantsFragment extends Fragment implements FirebaseHelper
             placesBuffer.close();
         }
 
-        if (Pojoplaces.size() == 0){
-            likedRecyclerView.setBackgroundResource(R.drawable.no_liked_places_found);
+        if (Pojoplaces.size() == 0) {
+            noLikedRestaurants.setVisibility(View.VISIBLE);
+        } else {
+            noLikedRestaurants.setVisibility(View.GONE);
+            mAdaptor = new RestaurantListAdapter(Pojoplaces, GoogleMapsFragment.getCurrentlocation(), placesBuffer, getContext());
+            likedRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            RecyclerViewMods.setAnimation(likedRecyclerView);
+            likedRecyclerView.setAdapter(mAdaptor);
         }
-        mAdaptor = new RestaurantListAdapter(Pojoplaces, GoogleMapsFragment.getCurrentlocation(), placesBuffer, getContext());
-        likedRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        RecyclerViewMods.setAnimation(likedRecyclerView);
-        likedRecyclerView.setAdapter(mAdaptor);
     }
 
 
@@ -134,35 +144,4 @@ public class LikedRestaurantsFragment extends Fragment implements FirebaseHelper
         }
     }
 
-
-    //unused interface methods
-    @Override
-    public void datadownloadedcallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void workUsersDataCallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
-    }
-
-    @Override
-    public void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId) {
-    }
-
-    @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
-
-    }
-
-    @Override
-    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
-
-    }
-
-    @Override
-    public void isItLikedCallback(boolean response) {
-    }
 }

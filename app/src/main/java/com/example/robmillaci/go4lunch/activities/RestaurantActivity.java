@@ -34,6 +34,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.jsoup.Connection;
+
 import java.util.ArrayList;
 
 import static com.example.robmillaci.go4lunch.data_objects.PojoPlace.PLACE_SERIALIZABLE_KEY;
@@ -43,8 +45,7 @@ import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_S
 /**
  * This activity is responsible for displaying the details of a specific place
  */
-public class RestaurantActivity extends AppCompatActivity implements IphotoDownloadedCallback,
-        FirebaseHelper.firebaseDataCallback, IhtmlParser {
+public class RestaurantActivity extends BaseActivity implements IphotoDownloadedCallback, IhtmlParser {
 
     public static final String MARKER_UNSELECTED = "notSelected"; //Tag for marker when the marker is 'unselected' as place the user is eating
     public static final String MARKER_SELECTED = "selected"; //Tag for marker when the marker is 'selected' as place the user is eating
@@ -391,24 +392,10 @@ public class RestaurantActivity extends AppCompatActivity implements IphotoDownl
         address.setText(String.format("%s - %s", value[0], mPojoPlace.getAddress()));
     }
 
-
-    //Unused interface methods
-    @Override
-    public void finishedGettingLikedRestaurants(ArrayList<String> places) {
-    }
-
     @Override
     public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
         //now we have the added friends ID's we can check if any of them have selected this place
         firebaseHelper.isPlaceSelected(placeID, users);
-    }
-
-    @Override
-    public void datadownloadedcallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void workUsersDataCallback(ArrayList arrayList) {
     }
 }
 

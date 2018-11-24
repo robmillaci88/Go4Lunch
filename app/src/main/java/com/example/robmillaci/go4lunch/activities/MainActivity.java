@@ -61,7 +61,7 @@ import static com.example.robmillaci.go4lunch.data_objects.PojoPlace.PLACE_SERIA
  * {@link RestaurantListFragment}<br>
  */
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FirebaseHelper.firebaseDataCallback {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     private Tab mMapTab; //Map tap item that displays the GoogleMapsFragment
     private Tab mListTab; //Map tap item that displays the GoogleMapsFragment
     private Tab mFriendsTab; //Map tap item that displays the GoogleMapsFragment
@@ -459,38 +459,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
-    }
-
-
-
-
-    //Unused interface methods
-    @Override
-    public void datadownloadedcallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void workUsersDataCallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
-    }
-
-    @Override
-    public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
-    }
-
-    @Override
-    public void isItLikedCallback(boolean response) {
-    }
-
-    @Override
-    public void finishedGettingLikedRestaurants(ArrayList<String> places) {
-    }
-
-    @Override
-    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
-
     }
 }

@@ -31,7 +31,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 /**
  * This class is responsible for creating the list of users in the system
  */
-public class UserListFragment extends Fragment implements FirebaseHelper.firebaseDataCallback {
+public class UserListFragment extends BaseFragment {
     private final String TAB_SHAREDPREF_KEY = "tabSelected";
     private final int ALL_WORKERS_TAB = 0;
     @SuppressWarnings("FieldCanBeLocal")
@@ -218,32 +218,5 @@ public class UserListFragment extends Fragment implements FirebaseHelper.firebas
             tab.select();
         }
         super.onResume();
-    }
-
-
-    //unused interface methods
-    @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
-    }
-
-    @Override
-    public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
-    }
-
-    @Override
-    public void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId) {
-    }
-
-    @Override
-    public void isItLikedCallback(boolean response) {
-    }
-
-    @Override
-    public void finishedGettingLikedRestaurants(ArrayList<String> places) {
-    }
-
-    @Override
-    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
-
     }
 }

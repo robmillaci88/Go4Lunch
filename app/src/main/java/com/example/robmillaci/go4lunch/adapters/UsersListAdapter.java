@@ -29,8 +29,7 @@ import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_A
 /**
  * This class is responsible for creating the adaptor to display all users of this app
  */
-public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.MyviewHolder> implements
-        FirebaseHelper.firebaseDataCallback,
+public class UsersListAdapter extends BaseAdapterClass implements
         Filterable {
 
     private ArrayList<Object> mUsersArrayList; //Arraylist containing all the users
@@ -55,32 +54,34 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.Myvi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final UsersListAdapter.MyviewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
+        final MyviewHolder myviewHolder = (MyviewHolder)holder;
+
         final Users user = (Users) mUsersArrayList.get(position); //get the user related to this position
         final String name = user.getUsername(); //get the users name
         final String email = user.getUserEmail(); //get the users email
         final String uId = user.getUserID(); //get the users ID
         final String pic = user.getUserPic() == null ? "" : user.getUserPic(); //get the users picture
 
-        holder.uniqueId = uId; //get the unique id of the user in this position
+        myviewHolder.uniqueId = uId; //get the unique id of the user in this position
 
-        FirebaseHelper firebaseHelper = new FirebaseHelper(this, holder);
+        FirebaseHelper firebaseHelper = new FirebaseHelper(this, myviewHolder);
         firebaseHelper.getAddedUsers();  //get the current users addedUsers. The results are called back to this classes finishedGettingUsers method
 
-        holder.userEmail.setText(email); //set the users email
-        holder.username.setText(name); //set the users name
+        myviewHolder.userEmail.setText(email); //set the users email
+        myviewHolder.username.setText(name); //set the users name
 
 
         //load the users picture into the holder view
         if (!pic.equals("")) {
-            Picasso.get().load(pic).into(holder.userPicture);
+            Picasso.get().load(pic).into(myviewHolder.userPicture);
         } else {
-            holder.userPicture.setImageResource(R.drawable.com_facebook_profile_picture_blank_portrait);
+            myviewHolder.userPicture.setImageResource(R.drawable.com_facebook_profile_picture_blank_portrait);
         }
 
         //set the addFriend on click listener. First retrieve the list of currently added users and then pass this to the addFriend method in FireBaseHelper class
         //Updates the UI to reflect the adding of a user and displays a Toast message to confirm 'Friend added'
-        holder.addFriend.setOnClickListener(new View.OnClickListener() {
+        myviewHolder.addFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FirebaseHelper.getCurrentUserData().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -99,8 +100,8 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.Myvi
 
                                 FirebaseHelper.addFriend(uId, addedUIds);
 
-                                holder.addFriend.setImageResource(R.drawable.checked);
-                                holder.addFriend.setClickable(false);
+                                myviewHolder.addFriend.setImageResource(R.drawable.checked);
+                                myviewHolder.addFriend.setClickable(false);
                                 Toast.makeText(mContext, R.string.friend_added, Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -192,36 +193,5 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.Myvi
             this.addFriend = itemView.findViewById(R.id.addFriend);
             this.uniqueId = "";
         }
-    }
-
-
-    //unused interface methods
-    @Override
-    public void datadownloadedcallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void workUsersDataCallback(ArrayList arrayList) {
-    }
-
-    @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
-    }
-
-    @Override
-    public void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId) {
-    }
-
-    @Override
-    public void isItLikedCallback(boolean response) {
-    }
-
-    @Override
-    public void finishedGettingLikedRestaurants(ArrayList<String> places) {
-    }
-
-    @Override
-    public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
-
     }
 }
