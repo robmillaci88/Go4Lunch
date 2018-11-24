@@ -264,7 +264,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
      */
     private void like(TabLayout.Tab tab) {
         if (tab.getTag() == null) tab.setTag(MARKER_UNSELECTED);
-        
+
         if (tab.getTag() != null) {
             switch (tab.getTag().toString()) {
                 case MARKER_UNSELECTED:
@@ -281,7 +281,6 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
             }
         }
     }
-
 
 
 

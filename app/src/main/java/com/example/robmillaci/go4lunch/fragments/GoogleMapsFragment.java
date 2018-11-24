@@ -566,7 +566,7 @@ public class GoogleMapsFragment extends BaseFragment implements
 
     //Refresh all the markers currently on the map to account for any changes
     private void refreshMarkers() {
-        if (mGoogleMap != null) {
+        if (mGoogleMap != null && mPlaces != null) {
             mGoogleMap.clear();
             Marker marker;
             MarkerOptions mOptions;
