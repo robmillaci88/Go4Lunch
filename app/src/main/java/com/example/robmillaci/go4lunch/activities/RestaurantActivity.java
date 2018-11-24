@@ -275,7 +275,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
 
                 case MARKER_SELECTED:
                     tab.setIcon(R.drawable.star);
-                    FirebaseHelper.removeLikeRestaurant(mPojoPlace.getId());
+                    FirebaseHelper.removeLikedPlace(mPojoPlace.getId());
                     tab.setTag(MARKER_UNSELECTED);
                     break;
             }
@@ -321,7 +321,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
     public void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId) {
         FirebaseHelper firebasehelper = new FirebaseHelper(RestaurantActivity.this);
 
-        firebasehelper.addSelectedMarker(mMarker.getTitle(), placeID, s);
+        firebasehelper.addSelectedPlace(mMarker.getTitle(), placeID, s);
         //now the field is deleted we can refresh the 'users eating here'
         firebaseHelper.getUsersEatingHere(mPojoPlace.getId(), null); //now we have unselected this place, refresh the list of users 'eating here'
     }

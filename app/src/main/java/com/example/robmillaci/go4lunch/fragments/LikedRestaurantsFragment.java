@@ -3,7 +3,6 @@ package com.example.robmillaci.go4lunch.fragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -14,11 +13,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.robmillaci.go4lunch.R;
-import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
 import com.example.robmillaci.go4lunch.adapters.RestaurantListAdapter;
-import com.example.robmillaci.go4lunch.adapters.UsersListAdapter;
 import com.example.robmillaci.go4lunch.data_objects.PojoPlace;
-import com.example.robmillaci.go4lunch.data_objects.Users;
 import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.example.robmillaci.go4lunch.utils.RecyclerViewMods;
 import com.google.android.gms.location.places.Place;
@@ -30,7 +26,7 @@ import static com.example.robmillaci.go4lunch.activities.MainActivity.LIKED_REST
 
 /**
  * This fragment is responsible for creating and displaying the users liked restaurants<br>
- * Builds the likedRestaurants using {@link #buildLikedRestaurants()} which calls {@link FirebaseHelper#getLikedRestaurants()}
+ * Builds the likedRestaurants using {@link #buildLikedRestaurants()} which calls {@link FirebaseHelper#getLikedPlaces()}
  */
 public class LikedRestaurantsFragment extends BaseFragment implements IgooglePlacescallback {
     private RecyclerView likedRecyclerView;
@@ -62,11 +58,11 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
 
 
     /**
-     * Calls {@link FirebaseHelper#getLikedRestaurants()} which calls back to {@link #finishedGettingLikedRestaurants(ArrayList)}
+     * Calls {@link FirebaseHelper#getLikedPlaces()} which calls back to {@link #finishedGettingLikedRestaurants(ArrayList)}
      */
     private void buildLikedRestaurants() {
         FirebaseHelper firebaseHelper = new FirebaseHelper(this);
-        firebaseHelper.getLikedRestaurants(); //see class docs
+        firebaseHelper.getLikedPlaces(); //see class docs
     }
 
 
@@ -94,7 +90,7 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
 
 
     /**
-     * Callback from {@link FirebaseHelper#getLikedRestaurants()}
+     * Callback from {@link FirebaseHelper#getLikedPlaces()}
      *
      * @param places returned liked place ID's
      */
