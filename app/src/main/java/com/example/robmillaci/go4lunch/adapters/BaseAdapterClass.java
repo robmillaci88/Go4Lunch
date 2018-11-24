@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public abstract class BaseAdapterClass extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements FirebaseHelper.firebaseDataCallback{
     @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
+    public void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v) {
     }
 
     @Override

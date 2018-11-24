@@ -1,6 +1,5 @@
 package com.example.robmillaci.go4lunch.firebase;
 
-import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -270,7 +269,7 @@ public class FirebaseHelper {
     }
 
 
-    public void isPlaceSelected(final String placeId, final String[]users) {
+    public void isPlaceSelected(final String placeId, final String[] users) {
         FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -284,23 +283,23 @@ public class FirebaseHelper {
                         for (DocumentSnapshot d : documents) {
                             String selectedPlace = (String) d.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD);
                             String uniqueID = (String) d.get(DATABASE_UNIQUE_ID_FIELD);
-                            if(placeId.equals(selectedPlace) && addedUsers.contains(uniqueID)){
+                            if (placeId.equals(selectedPlace) && addedUsers.contains(uniqueID)) {
                                 usersSelectedThisPlace.add(uniqueID);
                             }
                         }
 
-                        if(usersSelectedThisPlace.size() > 0){
-                            if(usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size()>1){
-                                mFirebaseDataCallback.isPlaceSelected(true,true);
-                            }else if(usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() == 1){
-                                mFirebaseDataCallback.isPlaceSelected(true,false);
-                            }else if(!usersSelectedThisPlace.contains(mCurrentUserId)){
-                                mFirebaseDataCallback.isPlaceSelected(false,true);
-                            }else {
-                                mFirebaseDataCallback.isPlaceSelected(false,false);
+                        if (usersSelectedThisPlace.size() > 0) {
+                            if (usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() > 1) {
+                                mFirebaseDataCallback.isPlaceSelected(true, true);
+                            } else if (usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() == 1) {
+                                mFirebaseDataCallback.isPlaceSelected(true, false);
+                            } else if (!usersSelectedThisPlace.contains(mCurrentUserId)) {
+                                mFirebaseDataCallback.isPlaceSelected(false, true);
+                            } else {
+                                mFirebaseDataCallback.isPlaceSelected(false, false);
                             }
-                        }else {
-                            mFirebaseDataCallback.isPlaceSelected(false,false);
+                        } else {
+                            mFirebaseDataCallback.isPlaceSelected(false, false);
                         }
 
                     }
@@ -427,43 +426,62 @@ public class FirebaseHelper {
     }
 
 
-    public void getUsersEatingHere(final String id, final RecyclerView.ViewHolder v) {
-        final ArrayList<Users> foundUsers = new ArrayList<>();
-        FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+    @SuppressWarnings("ConstantConditions")
+    public void getUsersEatingHere(final String placeId, final RecyclerView.ViewHolder v) {
+        FirebaseHelper.getCurrentUserData().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                final ArrayList<String> addedUsersArray = new ArrayList<>();
+                final ArrayList<Users> friendsEatingHere = new ArrayList<>();
                 if (task.isSuccessful()) {
-                    QuerySnapshot taskResults = task.getResult();
+                    try {
+                        final QuerySnapshot taskResults = task.getResult();
+                         List<DocumentSnapshot> documents = taskResults.getDocuments();
+                         String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(",");
+                        //noinspection unchecked
+                        addedUsersArray.addAll(Arrays.asList(addedUsers));
+                        final int[] count = new int[]{addedUsersArray.size()};
+                        for (String s : addedUsersArray) {
+                            FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH)
+                                    .document(s)
+                                    .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
 
-                    if (taskResults != null) {
-                        List<DocumentSnapshot> documents = taskResults.getDocuments();
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    count[0] --;
+                                    if (task.isSuccessful()) {
+                                        DocumentSnapshot taskResults = task.getResult();
+                                        if (taskResults != null) {
+                                            String id = taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString();
+                                            String name = taskResults.get(DATABASE_NAME_FIELD).toString();
+                                            String email = taskResults.get(DATABASE_EMAIL_FIELD).toString();
+                                            String picture = taskResults.get(DATABASE_PICTURE_FIELD).toString();
+                                            String selectedPlaceId = taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString();
 
-                        int count = documents.size();
-                        for (DocumentSnapshot d : documents) {
-                            count--;
-                            try {
-                                String selectedPlaceId = (String) d.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD);
-                                //noinspection ConstantConditions
-                                if (selectedPlaceId != null && selectedPlaceId.equals(id)) {
-                                    String name = (String) d.get(DATABASE_NAME_FIELD);
-                                    String email = (String) d.get(DATABASE_EMAIL_FIELD);
-                                    String picture = (String) d.get(DATABASE_PICTURE_FIELD);
-                                    String uniqueID = (String) d.get(DATABASE_UNIQUE_ID_FIELD);
-                                    foundUsers.add(new Users(name, uniqueID, email, picture));
+                                            if (selectedPlaceId.equals(placeId)) {
+                                                friendsEatingHere.add(new Users(name, id, email, picture));
+                                            }
+                                            if (count[0] == 0){
+                                                mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
+                                            }
+                                        }
+                                    }else {
+                                        Log.d("FIREBASE", "onComplete: task failed");
+                                    }
                                 }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            if (count == 0) {
-                                mFirebaseDataCallback.finishedGettingEaters(foundUsers, v);
-                            }
+                            });
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+                }else {
+                    mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
                 }
             }
         });
-
     }
+
+
 
     public void addChatData(final Map<String, Object> chatData, final String chattingTo) {
         final DocumentReference dbRef = FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId);
@@ -613,9 +631,8 @@ public class FirebaseHelper {
     }
 
 
-
     public interface firebaseDataCallback {
-        void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v);
+        void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v);
 
         void datadownloadedcallback(ArrayList<Object> arrayList);
 

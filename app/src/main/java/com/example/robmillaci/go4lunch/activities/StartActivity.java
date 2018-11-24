@@ -181,8 +181,8 @@ public class StartActivity extends AppCompatActivity {
                                 assert metadata != null;
                                 if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
                                     // The user is new so add the user to the database and display welcome message
-                                    addUserToDB(user);
                                     Toast.makeText(StartActivity.this, getString(R.string.welcome) + user.getDisplayName(), Toast.LENGTH_LONG).show();
+                                    addUserToDB(user);
                                 } else {
                                     //The user is not a new user, dont re-add to the database but display a welcome back message
                                     Toast.makeText(StartActivity.this, getString(R.string.welcome_back) + user.getDisplayName(), Toast.LENGTH_LONG).show();
@@ -216,6 +216,7 @@ public class StartActivity extends AppCompatActivity {
                                 //noinspection ConstantConditions
                                 if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
                                     // The user is new
+                                    Toast.makeText(StartActivity.this, getString(R.string.welcome) + user.getDisplayName(), Toast.LENGTH_LONG).show();
                                     addUserToDB(user);
                                 } else {
                                     Toast.makeText(StartActivity.this, getString(R.string.welcome_back) + user.getDisplayName(), Toast.LENGTH_LONG).show();
@@ -235,7 +236,7 @@ public class StartActivity extends AppCompatActivity {
 
     @SuppressWarnings("ConstantConditions")
     /*
-     * Once the user has been authenticated, logged in and added to the database. launch the MainActivity
+     * Once the user has been authenticated, log in and added to the database. launch the MainActivity
      */
     private void updateUI(FirebaseUser user) {
         if (user != null) {
@@ -243,6 +244,7 @@ public class StartActivity extends AppCompatActivity {
             loggedInUser = mAuth.getCurrentUser().getDisplayName();
             loggedInEmail = mAuth.getCurrentUser().getEmail();
             loggedInPic = mAuth.getCurrentUser().getPhotoUrl().toString();
+
 
             startActivity(launchMain);
         }

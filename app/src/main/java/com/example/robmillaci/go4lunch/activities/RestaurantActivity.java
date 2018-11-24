@@ -303,7 +303,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
      * @param v     used when this callback is called in a recyclerview class so that holder changes can be performed based on the results. Null is returned otherwise
      */
     @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
+    public void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v) {
         RestaurantActivityAdapter mAdaptor = new RestaurantActivityAdapter(users, this);
         peopleEatingRecyclerView.setLayoutManager(new LinearLayoutManager(RestaurantActivity.this));
         peopleEatingRecyclerView.setAdapter(mAdaptor);

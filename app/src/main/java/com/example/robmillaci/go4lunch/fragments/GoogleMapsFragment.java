@@ -574,20 +574,24 @@ public class GoogleMapsFragment extends BaseFragment implements
             for (String markerId : allMarkers.keySet()) {
                 Marker thisMarker = allMarkers.get(markerId);
 
-                if (selectedMarkers.contains(thisMarker)) { //if this is a selected marker re-add the marker with the icon set to marker_green
-                    mOptions = new MarkerOptions()
-                            .position(mPlaces.get(markerId).getLocation())
-                            .title(mPlaces.get(markerId).getName())
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_green));
-                    marker = mGoogleMap.addMarker(mOptions);
-                    marker.setTag(MARKER_SELECTED);
-                } else {//if this is not a selected marker re-add the marker with the icon set to marker_orange
-                    mOptions = new MarkerOptions()
-                            .position(mPlaces.get(markerId).getLocation())
-                            .title(mPlaces.get(markerId).getName())
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
-                    marker = mGoogleMap.addMarker(mOptions);
-                    marker.setTag(MARKER_UNSELECTED);
+                try {
+                    if (selectedMarkers.contains(thisMarker)) { //if this is a selected marker re-add the marker with the icon set to marker_green
+                        mOptions = new MarkerOptions()
+                                .position(mPlaces.get(markerId).getLocation())
+                                .title(mPlaces.get(markerId).getName())
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_green));
+                        marker = mGoogleMap.addMarker(mOptions);
+                        marker.setTag(MARKER_SELECTED);
+                    } else {//if this is not a selected marker re-add the marker with the icon set to marker_orange
+                        mOptions = new MarkerOptions()
+                                .position(mPlaces.get(markerId).getLocation())
+                                .title(mPlaces.get(markerId).getName())
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
+                        marker = mGoogleMap.addMarker(mOptions);
+                        marker.setTag(MARKER_UNSELECTED);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }

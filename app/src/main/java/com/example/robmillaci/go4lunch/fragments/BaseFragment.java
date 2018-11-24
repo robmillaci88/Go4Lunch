@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public abstract class BaseFragment extends Fragment implements FirebaseHelper.firebaseDataCallback {
     @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
+    public void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v) {
     }
 
     @Override

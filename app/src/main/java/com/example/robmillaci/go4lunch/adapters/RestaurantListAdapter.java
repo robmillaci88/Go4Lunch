@@ -407,7 +407,7 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
      * @param v the viewHolder to be updated
      */
     @Override
-    public void finishedGettingEaters(ArrayList<Users> users, RecyclerView.ViewHolder v) {
+    public void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v) {
         if (users != null) {
             ((MyviewHolder) v).numberOfEaters.setText(String.format(mContext.getString(R.string.friends), users.size()));
         } else {
