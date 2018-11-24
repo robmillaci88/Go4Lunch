@@ -55,6 +55,7 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         likedRecyclerView = view.findViewById(R.id.likedRecyclerView);
         noLikedRestaurants = view.findViewById(R.id.no_liked_places_found);
+        noLikedRestaurants.setVisibility(View.GONE);
         setHasOptionsMenu(true);
         buildLikedRestaurants(); //see class docs
     }

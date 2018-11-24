@@ -92,5 +92,5 @@
     <string name="no_places_found">Could not find any local pojoPlaces to eat!</string>
     <string name="google_services_error">Google Services is not installed, up-to-date, or enabled</string>
     <string name="google_services_not_available">Google services not currently available</string>
-    <string name="welcome">Welcome to Go4Lunch</string>
+    <string name="welcome">Welcome to Go4Lunch\u0020</string>
 </resources>
