@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -42,11 +43,16 @@
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppThemeInvisibleStatusBar" />
+
+        <receiver
+            android:name="com.example.robmillaci.go4lunch.alarms_and_receivers.Notifications"
+            android:enabled="true" />
+
         <activity
             android:name=".activities.StartActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppThemeInvisibleStatusBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -64,20 +70,19 @@
         <activity
             android:name=".activities.RestaurantActivity"
             android:label="@string/title_activity_restaurant"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppThemeVisibleStatusBarNoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.DIAL" />
             </intent-filter>
         </activity>
         <activity
             android:name=".activities.ChatActivity"
-            android:label="@string/title_activity_restaurant"
             android:theme="@style/AppThemeVisibleStatusBarWithActionBar">
         </activity>
         <activity
             android:name=".activities.ReviewsActivity"
             android:label="@string/title_activity_reviews"
-            android:theme="@style/AppThemeVisibleStatusBar"/>
+            android:theme="@style/AppThemeVisibleStatusBarWithActionBar"/>
         <activity android:name=".utils.GooglePlacesAutoComplete" />
 
         <service android:name=".firebase.MyFirebaseMessagingService"

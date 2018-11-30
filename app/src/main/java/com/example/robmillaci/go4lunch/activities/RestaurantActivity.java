@@ -9,8 +9,10 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,7 +20,7 @@ import android.widget.Toast;
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
 import com.example.robmillaci.go4lunch.adapters.RestaurantActivityAdapter;
-import com.example.robmillaci.go4lunch.adapters.UsersListAdapter;
+import com.example.robmillaci.go4lunch.alarms_and_receivers.Alarm;
 import com.example.robmillaci.go4lunch.data_objects.PojoPlace;
 import com.example.robmillaci.go4lunch.data_objects.Users;
 import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
@@ -50,13 +52,16 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
     private String phoneNumber; //The phone number of the place
     private String webaddress; //the web url of the place
     private String placeID; //the ID of the place
+    private Bitmap placeImage; //the image of the place
     private boolean isItSelected = false; //is this place selected by the user
     private boolean isItSelectedByOthers = false; //this place is selected by other users
+    private String[] usersEatingHere;
 
     private ImageView image; //The image of the place
     private FloatingActionButton selectedFab; //The action button to 'select' this place
     private TabLayout.Tab starLikeTab; //The tab to 'like' this place
     private RecyclerView peopleEatingRecyclerView; //Recycler view displaying the list of all friends 'eating' here
+    private ProgressBar eaterprogressbar; //progress bar to display while getting users eatin
 
     private PojoPlace mPojoPlace; //The place this activity is displaying data for
     private Marker mMarker; //The marker that relates to this place
@@ -80,10 +85,12 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant);
 
+
         firebaseHelper = new FirebaseHelper(this);
         photoDownloader = new PhotoDownloader(this, null);
 
         peopleEatingRecyclerView = findViewById(R.id.peopleEatingRecyclerView); //RecyclerView displaying the users eating at this place
+        eaterprogressbar = findViewById(R.id.eaterprogressbar);
         ImageView backbtn = findViewById(R.id.backbtn);
         TextView name = findViewById(R.id.restaurant_name); //The place name
 
@@ -94,8 +101,9 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
         starLikeTab = tabs.getTabAt(1); //The tab to 'like' this place
 
         Bundle data = getIntent().getExtras();
-        if (data != null)
+        if (data != null) {
             mPojoPlace = (PojoPlace) data.getSerializable(PLACE_SERIALIZABLE_KEY); //Restore the place passed to this activity in the calling intent
+        }
 
         if (mPojoPlace != null) {
             mMarker = GoogleMapsFragment.getSpecificMarker(mPojoPlace.getName()); //Retrieve the specific marker for this place
@@ -125,7 +133,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
 
         getAdditionalPlaceData(); //see method comments
 
-        firebaseHelper.getAddedUsers(); //get this users added friends so we can check if any of them have selected this place. Callsback to 'finishedGettingUsers'
+        firebaseHelper.getMyWorkUsers(null); //get this users added friends so we can check if any of them have selected this place. Callsback to 'workUsersDataCallback'
 
         selectedFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,6 +148,9 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
                     mMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_green));
                     mMarker.setTag(MARKER_SELECTED);
                     isItSelected = true;
+
+                    Alarm.scheduleAlarm(RestaurantActivity.this, mPojoPlace.getName(), placeImage, mPojoPlace.getAddress(), usersEatingHere);
+
                     firebaseHelper.getSelectedPlace(FirebaseHelper.getmCurrentUserId(), null); //method calls back to 'finishedGettingPlace'
 
                 } else {
@@ -151,6 +162,8 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
                     selectedFab.setImageResource(R.drawable.add_restaurant);
                     FirebaseHelper.deleteField(DATABASE_SELECTED_RESTAURANT_FIELD);
                     FirebaseHelper.deleteField(DATABASE_SELECTED_RESTAURANT_ID_FIELD);
+
+                    Alarm.cancelAlarm(RestaurantActivity.this);
 
                     firebaseHelper.getUsersEatingHere(mPojoPlace.getId(), null); //now we have unselected this place, refresh the list of users 'eating here'
 
@@ -218,8 +231,10 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
 
         photoDownloader.getPhotos(placeID, Places.getGeoDataClient(this));
 
-        firebaseHelper.getUsersEatingHere(mPojoPlace.getId(), null);
-        firebaseHelper.isItLiked(mPojoPlace.getId());
+        eaterprogressbar.setVisibility(View.VISIBLE);
+        eaterprogressbar.setProgress(1);
+        firebaseHelper.getUsersEatingHere(placeID, null);
+        firebaseHelper.isItLiked(placeID);
     }
 
 
@@ -283,7 +298,6 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
     }
 
 
-
     /**
      * Starts an ACTION_DIAL intent to allow the user to call the relevant place
      */
@@ -300,10 +314,41 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
      * Displays the users of the App that are eating at this place
      *
      * @param users the users eating at this place
-     * @param v     used when this callback is called in a recyclerview class so that holder changes can be performed based on the results. Null is returned otherwise
+     * @param o     used when this callback is called in a recyclerview class so that holder changes can be performed based on the results. Null is returned otherwise
+     */
+
+    @Override
+    public void workUsersDataCallback(ArrayList<Users> users, Object o) {
+        //now we have the added friends ID's we can check if any of them have selected this place
+        String[] usersIds = new String[users.size() + 1];
+        for (int i = 0; i < users.size(); i++) {
+            usersIds[i] = users.get(i).getUserID();
+        }
+
+        //we need to add the current users ID here as this is filtered out in the firebase searches
+        usersIds[users.size()] = FirebaseHelper.getmCurrentUserId();
+
+        firebaseHelper.isPlaceSelected(placeID, usersIds);
+    }
+
+
+    /**
+     * Callback from {@link FirebaseHelper#getUsersEatingHere} to create the recycler view of users eating at this place
+     *
+     * @param users the list of users eating here
+     * @param v     not used in this overridden method as we dont have any viewholders to update
      */
     @Override
     public void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v) {
+        Log.d("check", "finishGettingUsersEatingHere: called");
+        usersEatingHere = new String[users.size()];
+
+        for (int i = 0; i < users.size(); i++) {
+            usersEatingHere[i] = users.get(i).getUsername();
+        }
+
+        eaterprogressbar.setVisibility(View.GONE);
+
         RestaurantActivityAdapter mAdaptor = new RestaurantActivityAdapter(users, this);
         peopleEatingRecyclerView.setLayoutManager(new LinearLayoutManager(RestaurantActivity.this));
         peopleEatingRecyclerView.setAdapter(mAdaptor);
@@ -336,6 +381,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
     @Override
     public void photoReady(Bitmap photo, RecyclerView.ViewHolder holder) {
         if (photo != null) {
+            this.placeImage = photo;
             image.setImageBitmap(photo);
         } else {
             image.setImageResource(R.drawable.emptyplate);
@@ -359,6 +405,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
             starLikeTab.setIcon(R.drawable.star);
         }
     }
+
 
     /**
      * callback from {@link FirebaseHelper#isPlaceSelected(String, String[])} to determine if any friends or the current user has selected this place
@@ -385,16 +432,16 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
      * @param value the returned objects from this method
      */
     @Override
-    public void parseComplete(Object... value) {
+    public void parseComplete(String response, Object... value) {
         TextView address = findViewById(R.id.restaurant_address);
-        address.setText(String.format("%s - %s", value[0], mPojoPlace.getAddress()));
+        if (response.equals(HtmlParser.DOWNLOAD_OK)) {
+            address.setText(String.format("%s - %s", value[0], mPojoPlace.getAddress()));
+        } else {
+            address.setText(mPojoPlace.getAddress()!= null ? mPojoPlace.getAddress() : getString(R.string.no_address_found));
+            Toast.makeText(this, R.string.error_getting_details, Toast.LENGTH_LONG).show();
+        }
     }
 
-    @Override
-    public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
-        //now we have the added friends ID's we can check if any of them have selected this place
-        firebaseHelper.isPlaceSelected(placeID, users);
-    }
 }
 
 

@@ -26,18 +26,20 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Handler;
 
 import static com.example.robmillaci.go4lunch.activities.RestaurantActivity.MARKER_UNSELECTED;
 
 public class FirebaseHelper {
     private static final String mCurrentUserId; //the current users ID
     private static final String mCurrentUserPicUrl; //the current users picture URL
-    private static int count; //the count of the added friends
     private static final DocumentReference userDoc; //the users document reference
     private static final String EXCLUDED_USER;
 
+    private int count; //the count of the added friends
 
     //Database field values
     static final String DATABASE_TOKEN_PATH = "token";
@@ -57,12 +59,11 @@ public class FirebaseHelper {
     private firebaseDataCallback mFirebaseDataCallback;
     private chatData mChatDataCallback;
 
-    private UsersListAdapter.MyviewHolder mViewHolder;
     private ArrayList<Users> usersObjects = new ArrayList<>();
 
 
     /**
-     * 3 constructors for this class one for different callbacks and for instantiation from a Recyclerview adapter class
+     * 2 constructors for this class one for each different callback
      *
      * @param mCallback the callback for this instance of the class
      */
@@ -73,11 +74,6 @@ public class FirebaseHelper {
 
     public FirebaseHelper(chatData mCallback) {
         mChatDataCallback = mCallback;
-    }
-
-    public FirebaseHelper(firebaseDataCallback mCallback, UsersListAdapter.MyviewHolder viewholder) {
-        mFirebaseDataCallback = mCallback;
-        this.mViewHolder = viewholder;
     }
 
 
@@ -103,28 +99,33 @@ public class FirebaseHelper {
 
 
     /**
-     * Returns the current users friends from the database and then calles {@link #createUserObjects(ArrayList)} to be used by the application
+     * Returns the current users friends from the database and then calls {@link #createUserObjects(ArrayList, Object)} to be used by the application
      */
     @SuppressWarnings("ConstantConditions")
-    public void getMyWorkUsers() {
+    public void getMyWorkUsers(final Object returnObject) {
         FirebaseHelper.getCurrentUserData().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 ArrayList<String> addedUsersArray = new ArrayList<>(); //arraylist to hold the added users
+                HashSet<String> hashSet = new HashSet<>(); //used to remove any duplication
+
                 if (task.isSuccessful()) {
                     try {
                         QuerySnapshot taskResults = task.getResult();
                         List<DocumentSnapshot> documents = taskResults.getDocuments();
                         String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(","); //split the returned "added users" string
 
-                        //noinspection unchecked
-                        addedUsersArray.addAll(Arrays.asList(addedUsers)); //add the added users to the arraylist
+                        hashSet.addAll(Arrays.asList(addedUsers)); //ensure not duplicates
+                        addedUsersArray.addAll(hashSet); //add the results to an array list for return
+
+                        createUserObjects(addedUsersArray, returnObject); //create the users objects from the arraylist of added users
+
                     } catch (Exception e) {
                         e.printStackTrace();
-                        createUserObjects(null);
+                        createUserObjects(null, null);
                     }
                 }
-                createUserObjects(addedUsersArray); //create the users objects from the arraylist of added users
+
             }
         });
     }
@@ -134,13 +135,14 @@ public class FirebaseHelper {
      * From a string of user Id's this method will extract the relevant user details from Firebase and create {@link Users}
      *
      * @param addedUsersArray the arraylist of user IDs to lookup in the database
+     * @param returnObject    the object that is required to return to the callback method
      */
-    private void createUserObjects(ArrayList<String> addedUsersArray) {
+    private void createUserObjects(ArrayList<String> addedUsersArray, final Object returnObject) {
         if (addedUsersArray == null) {
-            mFirebaseDataCallback.workUsersDataCallback(null);
+            mFirebaseDataCallback.workUsersDataCallback(null, null);
         } else {
             usersObjects = new ArrayList<>();
-            count = addedUsersArray.size(); //count to determine when we have looped through each user
+            count = addedUsersArray.size(); //count to determine when we have looped through each user. Minus 1 because we are not including the logged in user
             for (String s : addedUsersArray) { //for each user ID in the addedUsersArray, loop through and extract their relevant information to create Users objects
                 Query docRef = FirebaseHelper.getQueryDocSnapshot(s);
                 docRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -169,18 +171,17 @@ public class FirebaseHelper {
                                 count--;
 
                                 if (count == 0) { //if the count is 0, we have looped through every user ID so we can now callback with the resulting user objects
-                                    mFirebaseDataCallback.workUsersDataCallback(usersObjects);
+                                    mFirebaseDataCallback.workUsersDataCallback(usersObjects, returnObject);
                                 }
                             } else {
-                                mFirebaseDataCallback.workUsersDataCallback(null);
+                                Log.d("workUsersDataCallback", "onComplete: task failed");
+                                mFirebaseDataCallback.workUsersDataCallback(null, null);
                             }
                         }
                     }
                 });
             }
-
         }
-
     }
 
 
@@ -205,39 +206,15 @@ public class FirebaseHelper {
                             String picture = (String) d.get(DATABASE_PICTURE_FIELD);
                             String uniqueID = (String) d.get(DATABASE_UNIQUE_ID_FIELD);
 
-                            Users user = new Users(name, uniqueID, email, picture);
-                            usersArrayList.add(user);
+                            if (uniqueID != null && !uniqueID.equals(EXCLUDED_USER)) {
+                                usersArrayList.add(new Users(name, uniqueID, email, picture));
+                            }
                         }
                         mFirebaseDataCallback.datadownloadedcallback(usersArrayList); //callback with the results
                     }
                 }
             }
         });
-    }
-
-
-    /**
-     * Gets the users 'added friends' and callsback with the results
-     */
-    public void getAddedUsers() {
-        FirebaseHelper.getCurrentUserData().get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        try {
-                            QuerySnapshot taskResults = task.getResult();
-                            @SuppressWarnings("ConstantConditions") List<DocumentSnapshot> documents = taskResults.getDocuments();
-                            DocumentSnapshot d = documents.get(0); //There will only be one document returned in this case (the current users doc) so we can safely .get(0)
-                            String addedUIDs = (String) d.get(DATABASE_ADDED_USERS_FIELD); //get the added users id's from the users document
-                            assert addedUIDs != null;
-                            String[] addedUsersUniqueID = addedUIDs.split(","); //split the CSV's into a string array
-                            mFirebaseDataCallback.finishedGettingUsers(addedUsersUniqueID, mViewHolder); //callback with the results
-
-                        } catch (Exception e) {
-                            mFirebaseDataCallback.finishedGettingUsers(new String[]{""}, mViewHolder); //on an exception, we callback with a string[] containing ""
-                        }
-                    }
-                });
     }
 
 
@@ -275,8 +252,11 @@ public class FirebaseHelper {
             FirebaseHelper.deleteField(DATABASE_SELECTED_RESTAURANT_FIELD);
             FirebaseHelper.deleteField(DATABASE_SELECTED_RESTAURANT_ID_FIELD);
             Marker m = GoogleMapsFragment.getSpecificMarker(oldplaceId);
-            m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
-            m.setTag(MARKER_UNSELECTED);
+            if (m != null) {
+                m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
+                m.setTag(MARKER_UNSELECTED);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -335,38 +315,42 @@ public class FirebaseHelper {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
-                    QuerySnapshot taskResults = task.getResult();
-                    ArrayList<String> addedUsers = new ArrayList<>(Arrays.asList(users)); //create an arraylist holding the friends of the user
-                    if (taskResults != null) {
-                        ArrayList<String> usersSelectedThisPlace = new ArrayList<>(); //create an arraylist to hold all the users who have selected this place
-                        List<DocumentSnapshot> documents = taskResults.getDocuments();
+                    try {
+                        QuerySnapshot taskResults = task.getResult();
+                        ArrayList<String> addedUsers = new ArrayList<>(Arrays.asList(users)); //create an arraylist holding the friends of the user
+                        if (taskResults != null) {
+                            ArrayList<String> usersSelectedThisPlace = new ArrayList<>(); //create an arraylist to hold all the users who have selected this place
+                            List<DocumentSnapshot> documents = taskResults.getDocuments();
 
-                        for (DocumentSnapshot d : documents) { //loop through each document returned
-                            String selectedPlace = (String) d.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD); //get the documents DATABASE_SELECTED_RESTAURANT_ID_FIELD value
-                            String uniqueID = (String) d.get(DATABASE_UNIQUE_ID_FIELD); //get the documents DATABASE_UNIQUE_ID_FIELD (the id of the users)
+                            for (DocumentSnapshot d : documents) { //loop through each document returned
+                                String selectedPlace = (String) d.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD); //get the documents DATABASE_SELECTED_RESTAURANT_ID_FIELD value
+                                String uniqueID = (String) d.get(DATABASE_UNIQUE_ID_FIELD); //get the documents DATABASE_UNIQUE_ID_FIELD (the id of the users)
 
-                            //if the place ID we are checking against is present in the returned users 'selected place' & the returned user is a friend then
-                            //add to the usersSelectedThisPlace array (we are only interested in those users who have selected this place AND are our friend
-                            if (placeId.equals(selectedPlace) && addedUsers.contains(uniqueID)) {
-                                usersSelectedThisPlace.add(uniqueID);
+                                //if the place ID we are checking against is present in the returned users 'selected place' & the returned user is a friend then
+                                //add to the usersSelectedThisPlace array (we are only interested in those users who have selected this place AND are our friend
+                                if (placeId.equals(selectedPlace) && addedUsers.contains(uniqueID)) {
+                                    usersSelectedThisPlace.add(uniqueID);
+                                }
                             }
-                        }
 
-                        if (usersSelectedThisPlace.size() > 0) {
-                            //check wether the current user has selected this place and wether otherusers in the app have also selected this place
-                            if (usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() > 1) {
-                                mFirebaseDataCallback.isPlaceSelected(true, true);
-                            } else if (usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() == 1) {
-                                mFirebaseDataCallback.isPlaceSelected(true, false);
-                            } else if (!usersSelectedThisPlace.contains(mCurrentUserId)) {
-                                mFirebaseDataCallback.isPlaceSelected(false, true);
+                            if (usersSelectedThisPlace.size() > 0) {
+                                //check wether the current user has selected this place and wether otherusers in the app have also selected this place
+                                if (usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() > 1) {
+                                    mFirebaseDataCallback.isPlaceSelected(true, true);
+                                } else if (usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() == 1) {
+                                    mFirebaseDataCallback.isPlaceSelected(true, false);
+                                } else if (!usersSelectedThisPlace.contains(mCurrentUserId)) {
+                                    mFirebaseDataCallback.isPlaceSelected(false, true);
+                                } else {
+                                    mFirebaseDataCallback.isPlaceSelected(false, false);
+                                }
                             } else {
                                 mFirebaseDataCallback.isPlaceSelected(false, false);
                             }
-                        } else {
-                            mFirebaseDataCallback.isPlaceSelected(false, false);
-                        }
 
+                        }
+                    }catch (Exception e){
+                        mFirebaseDataCallback.isPlaceSelected(false, false);
                     }
                 }
             }
@@ -393,7 +377,7 @@ public class FirebaseHelper {
 
                         int count = 0;
                         for (String s : likedPlacesArray) { //for each string in the liked places array
-                            if (!s.equals(id)) {//if the liked place id doesnt = the id of the place to remove
+                            if (!s.equals(id)) {//if the liked place id doesn't = the id of the place to remove
                                 if (count == 0) { //are we at the first position in the new CSV string ?
                                     sb.append(s); //yes - then append the value to the string builder
                                     count++; //and then increment the count
@@ -422,7 +406,8 @@ public class FirebaseHelper {
 
     /**
      * Checks wether a specific place ID is 'liked'
-     * @param id
+     *
+     * @param id the Id of the place to check if its liked
      */
     public void isItLiked(final String id) {
         FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(getmCurrentUserId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -518,15 +503,17 @@ public class FirebaseHelper {
         FirebaseHelper.getCurrentUserData().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                final ArrayList<String> addedUsersArray = new ArrayList<>(); //To hold all added users
                 final ArrayList<Users> friendsEatingHere = new ArrayList<>(); //To hold those users that are eating at this place
+                final HashSet<String> usersHashSet = new HashSet<>(); //to 100% ensure we have no duplicates
                 if (task.isSuccessful()) {
                     try {
                         final QuerySnapshot taskResults = task.getResult();
                         List<DocumentSnapshot> documents = taskResults.getDocuments();
-                        String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(",");
+                        String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(","); //split the returned users CSV string into a String[]
                         //noinspection unchecked
-                        addedUsersArray.addAll(Arrays.asList(addedUsers));
+                        usersHashSet.addAll(Arrays.asList(addedUsers)); //to 100% ensure no duplicates
+
+                        final ArrayList<String> addedUsersArray = new ArrayList<>(usersHashSet);
                         final int[] count = new int[]{addedUsersArray.size()};
 
                         //Now we have the list of added friends, loop through each one and see if they have selected the specific place
@@ -542,37 +529,49 @@ public class FirebaseHelper {
                                     if (task.isSuccessful() && task != null) {
                                         DocumentSnapshot taskResults = task.getResult();
                                         try {
-                                            if (taskResults != null) {
-                                                String id = taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString(); //extract the friends ID
-                                                String name = taskResults.get(DATABASE_NAME_FIELD).toString(); //extract the friends name
-                                                String email = taskResults.get(DATABASE_EMAIL_FIELD).toString(); //extract the friends email
-                                                String picture = taskResults.get(DATABASE_PICTURE_FIELD).toString(); //extract the friends picture
+                                            if (taskResults != null && taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD) != null) {
                                                 String selectedPlaceId = taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString(); //extract the friends selected place id
 
                                                 if (selectedPlaceId.equals(placeId)) { //if the friends selected place is equal to the place we are checking against, add to the arraylist
+                                                    String id = taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString(); //extract the friends ID
+                                                    String name = taskResults.get(DATABASE_NAME_FIELD).toString(); //extract the friends name
+                                                    String email = taskResults.get(DATABASE_EMAIL_FIELD).toString(); //extract the friends email
+                                                    String picture = taskResults.get(DATABASE_PICTURE_FIELD).toString(); //extract the friends picture
+
                                                     friendsEatingHere.add(new Users(name, id, email, picture));
                                                 }
                                                 if (count[0] == 0) { //if we have looped through every friend, callback the results
                                                     mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
                                                 }
                                             }
-                                        }catch (Exception e){
+                                        } catch (Exception e) {
                                             e.printStackTrace();
+                                            getUsersEatingHereError(friendsEatingHere,v);
                                         }
                                     } else {
                                         Log.d("FIREBASE", "onComplete: task failed");
+                                        getUsersEatingHereError(friendsEatingHere,v);;
                                     }
                                 }
                             });
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                        getUsersEatingHereError(friendsEatingHere,v);
                     }
                 } else { //if the task isnt successful, callback with an Array of size 0
-                    mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
+                    getUsersEatingHereError(friendsEatingHere,v);
                 }
             }
         });
+
+    }
+
+    private void createTimeout() {
+    }
+
+    private void getUsersEatingHereError(ArrayList<Users> friendsEatingHere,RecyclerView.ViewHolder v){
+        mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere,v);
     }
 
 
@@ -635,12 +634,11 @@ public class FirebaseHelper {
 
                 if (taskResults != null) {
                     Map<String, Object> chattingToUserData = taskResults.getData();
-
                     ArrayList<ChatObject> ChattingTochatObjects = new ArrayList<>();
                     if (chattingToUserData != null) {
                         Object[] keySet = chattingToUserData.keySet().toArray();
 
-                        for (int i = 0; i < userChatData.size(); i++) {
+                        for (int i = 0; i < chattingToUserData.size(); i++) {
                             String key = (String) keySet[i];
                             String messageBody = (String) chattingToUserData.get(key);
                             ChattingTochatObjects.add(new ChatObject(key, messageBody, true));
@@ -656,7 +654,7 @@ public class FirebaseHelper {
     public static void newMessage(final String messageFromUserId) {
         final DocumentReference dbRef = FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId);
 
-        FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId).collection(DATABASE_CHAT_NOTIFICATIONS)
+        dbRef.collection(DATABASE_CHAT_NOTIFICATIONS)
                 .document(messageFromUserId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -679,13 +677,12 @@ public class FirebaseHelper {
     }
 
     public void checkNewNotifications(final String userID, final RecyclerView.ViewHolder viewHolder) {
-
-        FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId).collection(DATABASE_CHAT_NOTIFICATIONS)
-                .document(userID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful() && task.getResult() != null) {
-                    if (task.getResult().getData() != null) {
+        if (!userID.equals(mCurrentUserId)) {
+            FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId).collection(DATABASE_CHAT_NOTIFICATIONS)
+                    .document(userID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful() && task.getResult() != null && task.getResult().get(NEW_MESSAGE_FIELD) != null) {
                         //we have a new notification from this user
                         ArrayList<Object> response = new ArrayList<>();
                         response.add(true);
@@ -694,8 +691,8 @@ public class FirebaseHelper {
 
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
 
@@ -716,8 +713,6 @@ public class FirebaseHelper {
     }
 
 
-
-
     public static String getmCurrentUserId() {
         return mCurrentUserId;
     }
@@ -727,16 +722,13 @@ public class FirebaseHelper {
     }
 
 
-
-
     public interface firebaseDataCallback {
         void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v);
 
         void datadownloadedcallback(ArrayList<Object> arrayList);
 
-        void workUsersDataCallback(ArrayList<Users> arrayList);
+        void workUsersDataCallback(ArrayList<Users> arrayList, Object returnObject);
 
-        void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder);
 
         void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId);
 

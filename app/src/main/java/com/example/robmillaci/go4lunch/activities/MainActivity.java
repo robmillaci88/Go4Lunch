@@ -2,6 +2,7 @@ package com.example.robmillaci.go4lunch.activities;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -18,26 +19,25 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
-import com.example.robmillaci.go4lunch.adapters.UsersListAdapter;
+import com.example.robmillaci.go4lunch.alarms_and_receivers.NetworkStateReceiver;
 import com.example.robmillaci.go4lunch.data_objects.PojoPlace;
-import com.example.robmillaci.go4lunch.data_objects.Users;
 import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
-import com.example.robmillaci.go4lunch.fragments.UserListFragment;
 import com.example.robmillaci.go4lunch.fragments.GoogleMapsFragment;
 import com.example.robmillaci.go4lunch.fragments.LikedRestaurantsFragment;
 import com.example.robmillaci.go4lunch.fragments.RestaurantListFragment;
-import com.example.robmillaci.go4lunch.web_service.HtmlParser;
+import com.example.robmillaci.go4lunch.fragments.UserListFragment;
+import com.example.robmillaci.go4lunch.utils.NetworkInfoChecker;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.location.places.PlaceBufferResponse;
 import com.google.android.gms.location.places.Places;
@@ -46,11 +46,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static android.support.design.widget.TabLayout.OnTabSelectedListener;
 import static android.support.design.widget.TabLayout.Tab;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.GOOGLE_MAPS_FRAGMENT;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.LIKED_RESTAURANT_FRAGMENT;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.NAV_DRAWER;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.RESTAURANT_LIST_FRAGMENT;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.USER_LIST_FRAGMENT;
 import static com.example.robmillaci.go4lunch.data_objects.PojoPlace.PLACE_SERIALIZABLE_KEY;
 
 /**
@@ -67,11 +71,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private Tab mFriendsTab; //Map tap item that displays the GoogleMapsFragment
     private Tab mLikedTab; //Map tap item that displays the GoogleMapsFragment
 
-    public static final String GOOGLE_MAPS_FRAGMENT = "google_maps_fragment";  //GoogleMapsFragment tag
-    public static final String LIKED_RESTAURANT_FRAGMENT = "liked_restaurant_fragment"; //LikedRestaurantFragment tag
-    public static final String RESTAURANT_LIST_FRAGMENT = "restaurant_list"; //RestaurantListFragment tag
-    public static final String USER_LIST_FRAGMENT = "user_list"; //UserListFragment tag
+
     private static final String SHARED_PREFERENCE_TAB_KEY = "fragmentSelected"; //SharePrefs key for the selected fragment
+
+    public static NetworkStateReceiver mNetworkStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,90 +84,119 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         setSupportActionBar(toolbar);
         setTitle(getString(R.string.main_title)); //Sets the title of this activty
 
+        ImageView noInternetImage = findViewById(R.id.no_internet_image);
+        Button tryAgainButton = findViewById(R.id.try_again_button);
+
+
+//        if (NetworkInfoChecker.isNetworkAvailable(this)) {
+        if (!NetworkInfoChecker.isNetworkAvailable(this)) {
+            noInternetImage.setVisibility(View.VISIBLE);
+            tryAgainButton.setVisibility(View.VISIBLE);
+            tryAgainButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                    recreate();
+                }
+            });
+        } else {
+            noInternetImage.setVisibility(View.GONE);
+            tryAgainButton.setVisibility(View.GONE);
+
+
+            mNetworkStateReceiver = new NetworkStateReceiver();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+            registerReceiver(mNetworkStateReceiver, filter);
+
        /*
        create the nav drawer and set the name, email and user pic to be displayed
         */
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+            DrawerLayout drawer = findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.addDrawerListener(toggle);
+            toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationView.setItemIconTintList(null);
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
+            navigationView.setItemIconTintList(null);
 
-        TextView navName = navigationView.getHeaderView(0).findViewById(R.id.navbarName);
-        TextView navEmail = navigationView.getHeaderView(0).findViewById(R.id.navbarEmail);
-        ImageView navPic = navigationView.getHeaderView(0).findViewById(R.id.profPic);
+            TextView navName = navigationView.getHeaderView(0).findViewById(R.id.navbarName);
+            TextView navEmail = navigationView.getHeaderView(0).findViewById(R.id.navbarEmail);
+            ImageView navPic = navigationView.getHeaderView(0).findViewById(R.id.profPic);
 
-        navName.setText(StartActivity.loggedInUser);
-        navEmail.setText(StartActivity.loggedInEmail);
+            navName.setText(StartActivity.loggedInUser);
+            navEmail.setText(StartActivity.loggedInEmail);
+            Picasso.get().load(StartActivity.loggedInPic).into(navPic);
 
-        Picasso.get().load(StartActivity.loggedInPic).into(navPic);
 
+            //create tab listeners which will perform UI changes to the tab icons and create the specific fragments
+            TabLayout mTabLayout = findViewById(R.id.tabLayout);
+            mMapTab = mTabLayout.getTabAt(0);
+            mListTab = mTabLayout.getTabAt(1);
+            mFriendsTab = mTabLayout.getTabAt(2);
+            mLikedTab = mTabLayout.getTabAt(3);
 
-        //create tab listeners which will perform UI changes to the tab icons and create the specific fragments
-        TabLayout mTabLayout = findViewById(R.id.tabLayout);
-        mMapTab = mTabLayout.getTabAt(0);
-        mListTab = mTabLayout.getTabAt(1);
-        mFriendsTab = mTabLayout.getTabAt(2);
-        mLikedTab = mTabLayout.getTabAt(3);
+            mTabLayout.addOnTabSelectedListener(new OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(Tab tab) {
+                    switch (tab.getPosition()) {
+                        case 0:
+                            mListTab.setIcon(R.drawable.list);
+                            mFriendsTab.setIcon(R.drawable.work_mates);
+                            mMapTab.setIcon(R.drawable.map_icon_select);
+                            mLikedTab.setIcon(R.drawable.like);
+                            createGoogleMapsFragment();
+                            break;
 
-        mTabLayout.addOnTabSelectedListener(new OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(Tab tab) {
-                switch (tab.getPosition()) {
-                    case 0:
-                        mListTab.setIcon(R.drawable.list);
-                        mFriendsTab.setIcon(R.drawable.work_mates);
-                        mMapTab.setIcon(R.drawable.map_icon_select);
-                        mLikedTab.setIcon(R.drawable.like);
-                        createGoogleMapsFragment();
-                        break;
+                        case 1:
+                            mListTab.setIcon(R.drawable.list_selected);
+                            mFriendsTab.setIcon(R.drawable.work_mates);
+                            mMapTab.setIcon(R.drawable.map_icon);
+                            mLikedTab.setIcon(R.drawable.like);
+                            createRestaurantListFragment();
+                            break;
 
-                    case 1:
-                        mListTab.setIcon(R.drawable.list_selected);
-                        mFriendsTab.setIcon(R.drawable.work_mates);
-                        mMapTab.setIcon(R.drawable.map_icon);
-                        mLikedTab.setIcon(R.drawable.like);
-                        createRestaurantListFragment();
-                        break;
+                        case 2:
+                            mListTab.setIcon(R.drawable.list);
+                            mFriendsTab.setIcon(R.drawable.works_mates_selected);
+                            mMapTab.setIcon(R.drawable.map_icon);
+                            mLikedTab.setIcon(R.drawable.like);
+                            createUserListFragment();
+                            break;
 
-                    case 2:
-                        mListTab.setIcon(R.drawable.list);
-                        mFriendsTab.setIcon(R.drawable.works_mates_selected);
-                        mMapTab.setIcon(R.drawable.map_icon);
-                        mLikedTab.setIcon(R.drawable.like);
-                        createUserListFragment();
-                        break;
-
-                    case 3:
-                        mLikedTab.setIcon(R.drawable.like_selected);
-                        mListTab.setIcon(R.drawable.list);
-                        mFriendsTab.setIcon(R.drawable.work_mates);
-                        mMapTab.setIcon(R.drawable.map_icon);
-                        createLikedRestaurantFragment();
+                        case 3:
+                            mLikedTab.setIcon(R.drawable.like_selected);
+                            mListTab.setIcon(R.drawable.list);
+                            mFriendsTab.setIcon(R.drawable.work_mates);
+                            mMapTab.setIcon(R.drawable.map_icon);
+                            createLikedRestaurantFragment();
+                    }
                 }
+
+                @Override
+                public void onTabUnselected(Tab tab) {
+                }
+
+                @Override
+                public void onTabReselected(Tab tab) {
+                    onTabSelected(tab);
+                }
+            });
+
+            //noinspection StatementWithEmptyBody
+            if (savedInstanceState == null) {
+                createGoogleMapsFragment();
+            } else {
+                // do nothing - fragment is recreated automatically
             }
 
-            @Override
-            public void onTabUnselected(Tab tab) {
-            }
+//        }else {
+//            Toast.makeText(this,"A network connection is required to use this app",Toast.LENGTH_LONG).show();
 
-            @Override
-            public void onTabReselected(Tab tab) {
-                onTabSelected(tab);
-            }
-        });
 
-        //noinspection StatementWithEmptyBody
-        if (savedInstanceState == null) {
-            createGoogleMapsFragment();
-        } else {
-            // do nothing - fragment is recreated automatically
         }
-
     }
 
     /**
@@ -175,11 +207,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         final LikedRestaurantsFragment likedRestaurantsFragment = new LikedRestaurantsFragment();
         FragmentManager manager = this.getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.fragment_container, likedRestaurantsFragment, LIKED_RESTAURANT_FRAGMENT);
+        transaction.replace(R.id.fragment_container, likedRestaurantsFragment, LIKED_RESTAURANT_FRAGMENT.name());
         transaction.addToBackStack(null);
         transaction.commit();
     }
-
 
 
     /**
@@ -190,11 +221,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         final UserListFragment friendsFragment = new UserListFragment();
         FragmentManager manager = this.getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.fragment_container, friendsFragment, USER_LIST_FRAGMENT);
+        transaction.replace(R.id.fragment_container, friendsFragment, USER_LIST_FRAGMENT.name());
         transaction.addToBackStack(null);
         transaction.commit();
     }
-
 
 
     /**
@@ -211,12 +241,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             final GoogleMapsFragment mapsFragment = new GoogleMapsFragment();
             FragmentManager manager = this.getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            transaction.replace(R.id.fragment_container, mapsFragment, GOOGLE_MAPS_FRAGMENT);
+            transaction.replace(R.id.fragment_container, mapsFragment, GOOGLE_MAPS_FRAGMENT.name());
             transaction.addToBackStack(null);
             transaction.commit();
         }
     }
-
 
 
     /**
@@ -232,7 +261,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             final RestaurantListFragment listFragment = new RestaurantListFragment();
             FragmentManager manager = this.getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            transaction.replace(R.id.fragment_container, listFragment, RESTAURANT_LIST_FRAGMENT);
+            transaction.replace(R.id.fragment_container, listFragment, RESTAURANT_LIST_FRAGMENT.name());
             transaction.commit();
         }
     }
@@ -306,7 +335,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
 
-
     //save the users currently selected tab so we can restore this value when returning to MainActivity
     @Override
     protected void onPause() {
@@ -314,9 +342,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         SharedPreferences.Editor spEditor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         spEditor.putString(SHARED_PREFERENCE_TAB_KEY, getVisibleFragmentTag());
         spEditor.apply();
+
+        try {
+            this.unregisterReceiver(mNetworkStateReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
-
 
 
     /*
@@ -325,27 +357,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     */
     @Override
     protected void onResume() {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        String fragmentTag = sp.getString(SHARED_PREFERENCE_TAB_KEY, GOOGLE_MAPS_FRAGMENT);
-        switch (fragmentTag) {
-            case RESTAURANT_LIST_FRAGMENT:
+        try {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            String fragmentTag = sp.getString(SHARED_PREFERENCE_TAB_KEY, GOOGLE_MAPS_FRAGMENT.name());
+
+            if (fragmentTag.equals(RESTAURANT_LIST_FRAGMENT.name())) {
                 mMapTab.select();
-                break;
-            case USER_LIST_FRAGMENT:
-                //do nothing
-                break;
-            case LIKED_RESTAURANT_FRAGMENT:
-                //do nothing
-                break;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         super.onResume();
-
     }
-
 
 
     /**
      * Searchs through all fragments and IF one of the found fragments is visible, return its tag
+     *
      * @return the currently visible fragments tag
      */
     public String getVisibleFragmentTag() {
@@ -361,14 +390,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
 
-
-
     /**
      * Uses the returned place ID to getPlaceByID from {@link Places}.<br>
      * Once we have the PojoPlace, a {@link PojoPlace} is created and passed to {@link RestaurantActivity} intent<br>
+     *
      * @param myviewHolder used in cases when callingback to a RecyclerView Adaptor to update the view holder
-     * @param s the place name
-     * @param placeId  the place ID
+     * @param s            the place name
+     * @param placeId      the place ID
      */
     @Override
     public void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId) {
@@ -380,80 +408,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 @Override
                 public void onComplete(@NonNull Task<PlaceBufferResponse> task) {
                     if (task.isSuccessful()) {
-                        com.google.android.gms.location.places.Place p = task.getResult().get(0);
-
-                        String name;
-                        String address;
-                        String website;
-                        String phoneNumber;
-                        String placeType;
-                        float rating = 0;
-                        String id = "0";
-                        double latitude = 0.00;
-                        double longitude = 0.00;
-
-                        try {
-                            name = p.getName().toString();
-                        } catch (Exception e) {
-                            name = getApplicationContext().getString(R.string.no_name_found);
-                            e.printStackTrace();
-                        }
-
-                        try {
-                            address = p.getAddress().toString();
-                        } catch (Exception e) {
-                            address = getApplicationContext().getString(R.string.no_address_found);
-                            e.printStackTrace();
-                        }
-
-                        try {
-                            website = p.getWebsiteUri().toString();
-                        } catch (Exception e) {
-                            website = getApplicationContext().getString(R.string.no_website_found);
-                            e.printStackTrace();
-                        }
-
-                        try {
-                            phoneNumber = p.getPhoneNumber().toString();
-                        } catch (Exception e) {
-                            phoneNumber = getApplicationContext().getString(R.string.no_phone_number);
-                            e.printStackTrace();
-                        }
-
-                        try {
-                            rating = p.getRating();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        try {
-                            id = p.getId();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        try {
-                            latitude = p.getLatLng().latitude;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        try {
-                            longitude = p.getLatLng().longitude;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        String[] placeId = new String[]{p.getId()};
-                        try {
-                            placeType = new HtmlParser().execute(placeId[0]).get();
-                        } catch (Exception e) {
-                            placeType = "";
-                            e.printStackTrace();
-                        }
+                        PlaceBufferResponse placeBufferResponse = task.getResult();
+                        com.google.android.gms.location.places.Place p = placeBufferResponse.get(0);
 
                         Intent restaurantDetailPage = new Intent(getApplicationContext(), RestaurantActivity.class);
-                        restaurantDetailPage.putExtra(PLACE_SERIALIZABLE_KEY, new PojoPlace(name, address, website, phoneNumber, placeType, rating, id, latitude, longitude, GOOGLE_MAPS_FRAGMENT));
+                        restaurantDetailPage.putExtra(PLACE_SERIALIZABLE_KEY,
+                                new PojoPlace(p, placeBufferResponse, NAV_DRAWER));
+
                         getApplicationContext().startActivity(restaurantDetailPage);
                     }
                 }

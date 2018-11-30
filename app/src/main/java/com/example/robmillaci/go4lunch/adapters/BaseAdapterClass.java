@@ -19,11 +19,8 @@ public abstract class BaseAdapterClass extends RecyclerView.Adapter<RecyclerView
     }
 
     @Override
-    public void workUsersDataCallback(ArrayList<Users> arrayList) {
-    }
+    public void workUsersDataCallback(ArrayList<Users> arrayList, Object o) {
 
-    @Override
-    public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
     }
 
     @Override

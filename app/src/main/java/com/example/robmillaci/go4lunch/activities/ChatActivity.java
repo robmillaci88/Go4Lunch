@@ -1,5 +1,6 @@
 package com.example.robmillaci.go4lunch.activities;
 
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -54,6 +55,11 @@ public class ChatActivity extends AppCompatActivity implements FirebaseHelper.ch
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(MainActivity.mNetworkStateReceiver, filter);
+
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true); //adds the home button to the action bar to navigate back from this activity
         }
@@ -87,8 +93,7 @@ public class ChatActivity extends AppCompatActivity implements FirebaseHelper.ch
 
                     chatData.put(dateFormat.format(date), StartActivity.loggedInUser + " - " + chatMessageEditText.getText().toString());
 
-                    FirebaseHelper firebaseHelper = new FirebaseHelper(ChatActivity.this);
-                    firebaseHelper.addChatData(chatData, chattingToId);
+                    new FirebaseHelper(ChatActivity.this).addChatData(chatData, chattingToId);
 
                     chatMessageEditText.setText("");
                 } else {
@@ -96,7 +101,6 @@ public class ChatActivity extends AppCompatActivity implements FirebaseHelper.ch
                 }
             }
         });
-
     }
 
 
@@ -191,4 +195,13 @@ public class ChatActivity extends AppCompatActivity implements FirebaseHelper.ch
 //        outState.putBoolean("returnFromChat", true);
 //        super.onSaveInstanceState(outState, outPersistentState);
 //    }
+    @Override
+    protected void onPause() {
+        try {
+            this.unregisterReceiver(MainActivity.mNetworkStateReceiver);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        super.onPause();
+    }
 }

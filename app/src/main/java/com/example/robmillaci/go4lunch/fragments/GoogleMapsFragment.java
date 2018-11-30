@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,9 +26,10 @@ import android.widget.Toast;
 
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.activities.RestaurantActivity;
+import com.example.robmillaci.go4lunch.activities.StartActivity;
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
-import com.example.robmillaci.go4lunch.adapters.UsersListAdapter;
 import com.example.robmillaci.go4lunch.data_objects.PojoPlace;
+import com.example.robmillaci.go4lunch.data_objects.Users;
 import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.example.robmillaci.go4lunch.utils.GooglePlacesAutoComplete;
 import com.example.robmillaci.go4lunch.web_service.GoogleAPIServices;
@@ -64,7 +66,7 @@ import java.util.List;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
-import static com.example.robmillaci.go4lunch.activities.MainActivity.GOOGLE_MAPS_FRAGMENT;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.*;
 import static com.example.robmillaci.go4lunch.activities.RestaurantActivity.MARKER_SELECTED;
 import static com.example.robmillaci.go4lunch.activities.RestaurantActivity.MARKER_UNSELECTED;
 import static com.facebook.FacebookSdk.getApplicationContext;
@@ -100,6 +102,11 @@ public class GoogleMapsFragment extends BaseFragment implements
     private ProgressBar searchingProgressBar; //The progress bar displayed when the app is searching for places
 
     private int relevantPlacesCount = 0; //The number of relevant places found
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final int DEFAULT_ZOOM = 13;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final int PLACES_SEARCH_API_ZOOM = 18;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -180,7 +187,7 @@ public class GoogleMapsFragment extends BaseFragment implements
                                         currentlocationLatLon = new LatLng(location.getLatitude(), location.getLongitude());
 
                                         //get the current users added friends
-                                        firebaseHelper.getAddedUsers();
+                                        firebaseHelper.getMyWorkUsers(null);
 
                                         //get the relevant places - see the method doc for more information
                                         getGooglePlaces();
@@ -253,39 +260,45 @@ public class GoogleMapsFragment extends BaseFragment implements
     private void getGooglePlaces() {
         //noinspection deprecation
         PlaceDetectionClient mPlaceDetectionClient = Places.getPlaceDetectionClient(getApplicationContext(), null);
-
         @SuppressLint("MissingPermission") Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
         placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
             @Override
             public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
-                likelyPlaces = task.getResult(); //get the results of the mPlaceDetectionClient.getCurrentPlace
+                try {
+                    likelyPlaces = task.getResult(); //get the results of the mPlaceDetectionClient.getCurrentPlace
 
-                if (likelyPlaces != null) {
-                    //for each placeLikelihood returned in the task results, get the place type  and check against conditions
-                    //We are checking for the following place types
-                    //TYPE_RESTAURANT, TYPE_BAR, TYPE_CAFE, TYPE_FOOD
-                    for (final PlaceLikelihood placeLikelihood : likelyPlaces) {
-                        List<Integer> placeType = placeLikelihood.getPlace().getPlaceTypes();
-                        if (placeType.size() > 0) {
-                            if (placeType.contains(com.google.android.gms.location.places.Place.TYPE_RESTAURANT) ||
-                                    placeType.contains(com.google.android.gms.location.places.Place.TYPE_BAR) ||
-                                    placeType.contains(com.google.android.gms.location.places.Place.TYPE_CAFE) ||
-                                    placeType.contains(com.google.android.gms.location.places.Place.TYPE_FOOD)) {
+                    if (likelyPlaces != null) {
+                        //for each placeLikelihood returned in the task results, get the place type  and check against conditions
+                        //We are checking for the following place types
+                        //TYPE_RESTAURANT, TYPE_BAR, TYPE_CAFE, TYPE_FOOD
+                        for (final PlaceLikelihood placeLikelihood : likelyPlaces) {
+                            List<Integer> placeType = placeLikelihood.getPlace().getPlaceTypes();
+                            if (placeType.size() > 0) {
+                                if (placeType.contains(com.google.android.gms.location.places.Place.TYPE_RESTAURANT) ||
+                                        placeType.contains(com.google.android.gms.location.places.Place.TYPE_BAR) ||
+                                        placeType.contains(com.google.android.gms.location.places.Place.TYPE_CAFE) ||
+                                        placeType.contains(com.google.android.gms.location.places.Place.TYPE_FOOD)) {
 
-                                relevantPlacesCount++; //increment the relevant places found count
+                                    relevantPlacesCount++; //increment the relevant places found count
 
-                                findPlacesResponse(false); //No error so we can respond by just hiding the UI components displayed while searching. Also animates the camera
+                                    findPlacesResponse(false); //No error so we can respond by just hiding the UI components displayed while searching. Also animates the camera
 
-                                addMarkersToMap(placeLikelihood.getPlace(), false); //Add the relevant places to the map
-                                mGoogleMap.setOnMarkerClickListener(GoogleMapsFragment.this); //sets the onMarkerClick listener
+                                    addMarkersToMap(placeLikelihood.getPlace(), false); //Add the relevant places to the map
+                                    mGoogleMap.setOnMarkerClickListener(GoogleMapsFragment.this); //sets the onMarkerClick listener
+                                }
+                            } else {
+                                findPlacesResponse(true); //we have no placeTypes returned, therefore show the user a message, hide UI elements for searching and animate camera
                             }
-                        } else {
-                            findPlacesResponse(true); //we have no placeTypes returned, therefore show the user a message, hide UI elements for searching and animate camera
                         }
+                        if (relevantPlacesCount == 0) {
+                            findPlacesResponse(true); //we have found no relevant places even though we have returned results. Act the same was as if we have found no placeTypes
+                        }
+                    } else {
+                        findPlacesResponse(true);
                     }
-                    if (relevantPlacesCount == 0) {
-                        findPlacesResponse(true); //we have found no relevant places even though we have returned results. Act the same was as if we have found no placeTypes
-                    }
+                } catch (Exception e) {
+                    findPlacesResponse(true);
+                    e.printStackTrace();
                 }
             }
         });
@@ -300,7 +313,7 @@ public class GoogleMapsFragment extends BaseFragment implements
         searchingImg.setVisibility(View.GONE);
         searchingProgressBar.setVisibility(View.GONE);
         searchingText.setVisibility(View.GONE);
-        cameraPosition = new CameraPosition.Builder().target(currentlocationLatLon).zoom(15).build();
+        cameraPosition = new CameraPosition.Builder().target(currentlocationLatLon).zoom(DEFAULT_ZOOM).build();
         mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
@@ -380,21 +393,19 @@ public class GoogleMapsFragment extends BaseFragment implements
     }
 
 
-    /**
-     * Callback from {@link FirebaseHelper#getAddedUsers()}<br>
-     * For each of the returned users, get the users selected place to display on the map
-     *
-     * @param users      the list of added users (friends)
-     * @param viewHolder if this is called from a RecyclerViewAdaptor class, this will be the viewholder to be updated
-     */
     @Override
-    public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
-        for (String s : users) {
-            if (!"".equals(s))
-                firebaseHelper.getSelectedPlace(s, null);
+    public void workUsersDataCallback(ArrayList<Users> arrayList, Object o) {
+        //As the current user is filtered out from the firebase helper methods, we need to add the current user in here to see our selected place
+        arrayList.add(new Users(StartActivity.loggedInUser, StartActivity.loggedinUserId,
+                StartActivity.loggedInEmail, StartActivity.loggedInPic));
+
+        for (Users u : arrayList) {
+            if (!u.getUserID().equals("")) {
+                firebaseHelper.getSelectedPlace(u.getUserID(), null);
+            }
+
         }
     }
-
 
     /**
      * Callback from {@link FirebaseHelper#getSelectedPlace(String, AddedUsersAdapter.MyviewHolder)}<br>
@@ -421,24 +432,32 @@ public class GoogleMapsFragment extends BaseFragment implements
      * @param places              the list of the returned places
      * @param placeBufferResponse the placeBufferResponse so we can close it once we are finished
      */
-    public void gotplaces(ArrayList<com.google.android.gms.location.places.Place> places, PlaceBufferResponse placeBufferResponse) {
+    public void gotplaces(ArrayList<com.google.android.gms.location.places.Place> places, final PlaceBufferResponse placeBufferResponse) {
         for (com.google.android.gms.location.places.Place p : places) {
             addMarkersToMap(p, true);
         }
-        //close the buffer to prevent memory leaks
-        placeBufferResponse.close();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (placeBufferResponse != null && !placeBufferResponse.isClosed()) {
+                    placeBufferResponse.close();
+                }
+            }
+        }, 1000);
     }
 
 
     /**
      * For the passed googlePlace, this method adds a marker to the map, it also converts the googlePlace to a {@link PojoPlace} so we can parse the place detail type
-     * and safely close the placeBufferReponse
+     * and safely close the placeBufferResponse
      *
      * @param place          the place to be added to the map and converted to {@link PojoPlace}
-     * @param selectedMarker determins wether this is a selected marker or not (to define the drawable set for the marker)
+     * @param selectedMarker determines wether this is a selected marker or not (to define the drawable set for the marker)
      */
     @SuppressWarnings("ConstantConditions")
     private void addMarkersToMap(final com.google.android.gms.location.places.Place place, boolean selectedMarker) {
+        Log.d("checkplaces", "addMarkersToMap: called");
         final Marker marker;
         MarkerOptions mOptions = new MarkerOptions()
                 .position(place.getLatLng())
@@ -457,24 +476,25 @@ public class GoogleMapsFragment extends BaseFragment implements
 
         allMarkers.put(marker.getTitle(), marker);
 
-        final String name = place.getName().toString();
-        final String address = place.getAddress().toString();
-        final String webSite = place.getWebsiteUri().toString();
-        final String phoneNumber = place.getPhoneNumber().toString();
-        final float rating = place.getRating();
-        final String id = place.getId();
-        final double latitude = place.getLatLng().latitude;
-        final double longitude = place.getLatLng().longitude;
-
         //creating the POJO places required HTML parsing which can slow down the main UI execution causing UX problems.
         //Handle the creation on a background thread to fix this issue and smooth out UX.
         new Thread(new Runnable() {
             @Override
             public void run() {
-                PojoPlace POJOplace = new PojoPlace(name, address, webSite, phoneNumber, "", rating, id, latitude, longitude, GOOGLE_MAPS_FRAGMENT);
+                PojoPlace pojoPlace = new PojoPlace(place, null, GOOGLE_MAPS_FRAGMENT);
 
-                mPlaces.put(POJOplace.getName(), POJOplace);
-                originalPlaces.put(POJOplace.getName(), POJOplace);
+                mPlaces.put(pojoPlace.getName(), pojoPlace);
+                originalPlaces.put(pojoPlace.getName(), pojoPlace);
+
+//                we want to run this once the above code has completed in the new thread, but we have to make UI changes on the main thread.
+//                therefore refreshMarkers() is called in runOnUiThread() method
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshMarkers();
+                    }
+                });
+
             }
         }).start();
     }
@@ -548,10 +568,15 @@ public class GoogleMapsFragment extends BaseFragment implements
             if (resultCode == RESULT_OK) {
                 com.google.android.gms.location.places.Place place = PlaceAutocomplete.getPlace(this.getActivity(), data);
 
-                addMarkersToMap(place, false);
+                if (mPlaces.containsKey(place.getName().toString())) {
+                    Toast.makeText(getActivity(), "This marker has already been added to the map", Toast.LENGTH_LONG).show();
+                } else {
+                    addMarkersToMap(place, false);
+                }
 
-                cameraPosition = new CameraPosition.Builder().target(place.getLatLng()).zoom(15).build();
+                cameraPosition = new CameraPosition.Builder().target(place.getLatLng()).zoom(PLACES_SEARCH_API_ZOOM).build();
                 mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
 
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this.getActivity(), data);
@@ -574,24 +599,27 @@ public class GoogleMapsFragment extends BaseFragment implements
             for (String markerId : allMarkers.keySet()) {
                 Marker thisMarker = allMarkers.get(markerId);
 
-                try {
-                    if (selectedMarkers.contains(thisMarker)) { //if this is a selected marker re-add the marker with the icon set to marker_green
-                        mOptions = new MarkerOptions()
-                                .position(mPlaces.get(markerId).getLocation())
-                                .title(mPlaces.get(markerId).getName())
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_green));
-                        marker = mGoogleMap.addMarker(mOptions);
-                        marker.setTag(MARKER_SELECTED);
-                    } else {//if this is not a selected marker re-add the marker with the icon set to marker_orange
-                        mOptions = new MarkerOptions()
-                                .position(mPlaces.get(markerId).getLocation())
-                                .title(mPlaces.get(markerId).getName())
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
-                        marker = mGoogleMap.addMarker(mOptions);
-                        marker.setTag(MARKER_UNSELECTED);
+                PojoPlace thisPlace = mPlaces.get(markerId);
+                if (thisPlace != null) {
+                    try {
+                        if (selectedMarkers.contains(thisMarker)) { //if this is a selected marker re-add the marker with the icon set to marker_green
+                            mOptions = new MarkerOptions()
+                                    .position(mPlaces.get(markerId).getLocation())
+                                    .title(mPlaces.get(markerId).getName())
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_green));
+                            marker = mGoogleMap.addMarker(mOptions);
+                            marker.setTag(MARKER_SELECTED);
+                        } else {//if this is not a selected marker re-add the marker with the icon set to marker_orange
+                            mOptions = new MarkerOptions()
+                                    .position(mPlaces.get(markerId).getLocation())
+                                    .title(mPlaces.get(markerId).getName())
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
+                            marker = mGoogleMap.addMarker(mOptions);
+                            marker.setTag(MARKER_UNSELECTED);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
         }
@@ -612,7 +640,10 @@ public class GoogleMapsFragment extends BaseFragment implements
     }
 
     public static Marker getSpecificMarker(String markerTitle) {
-        return allMarkers.get(markerTitle);
+        if (allMarkers != null) {
+            return allMarkers.get(markerTitle); //todo all markers can be null
+        }
+        return null;
     }
 
     public static GoogleMap getmGoogleMap() {

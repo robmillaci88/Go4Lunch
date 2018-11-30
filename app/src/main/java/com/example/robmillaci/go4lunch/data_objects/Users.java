@@ -1,5 +1,7 @@
 package com.example.robmillaci.go4lunch.data_objects;
 
+import android.util.Log;
+
 /**
  * Responsible for creating User objects in the application. Data from Firebase is passed into this class to create objects representing the users of the app
  */

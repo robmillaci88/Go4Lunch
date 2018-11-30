@@ -27,7 +27,7 @@
     <string name="no_name_found">No se encontró ningún nombre</string>
     <string name="open_now">Abierto ahora</string>
     <string name="closed_now">Cerrado ahora</string>
-    <string name="opening_hours_for">Horario de apertura para </string>
+    <string name="opening_hours_for">Horario de apertura para\u0020</string>
     <string name="ok">DE ACUERDO</string>
     <string name="error_getting_times">Error al obtener los datos de horarios de apertura</string>
     <string name="no_time_data">No hay datos de tiempo de apertura adicionales disponibles</string>
@@ -83,8 +83,11 @@
     <string name="error_getting_reviews">Error al obtener comentarios de lugar</string>
     <string name="no_reviews_found">No se han encontrado comentarios.</string>
     <string name="friend_added">Amigo añadido!</string>
-    <string name="no_places_found">Could not find any local pojoPlaces to eat!</string>
+    <string name="no_places_found">No se pudo encontrar ningún lugar local para comer!</string>
     <string name="google_services_error">Google Services no está instalado, actualizado o habilitado.</string>
     <string name="google_services_not_available">Los servicios de Google no están disponibles actualmente.</string>
     <string name="welcome">Bienvenido a Go4Lunch\u0020</string>
+    <string name="retry">retry</string>
+    <string name="your_lunch_at">Tu almuerzo es a las\u0020</string>
+    <string name="error_getting_details">Error al obtener algunos detalles del lugar, por favor revise su red</string>
 </resources>

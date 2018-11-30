@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.activities.MainActivity;
@@ -42,11 +43,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         recievedData = remoteMessage.getData();
         messageFromUserId = recievedData.get("uId");
+        Log.d("checkNewNotifications", "onMessageReceived: message from " + messageFromUserId);
         sendNotification(recievedData);
     }
 
     /**
-     * Create and show a custom notification containing the received FCM message.
+     * Create and show a custom notification containing the received message.
      **/
     private void sendNotification(Map<String, String> data) {
         Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.lunch_icon);

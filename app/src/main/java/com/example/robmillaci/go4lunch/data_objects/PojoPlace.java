@@ -1,12 +1,15 @@
 package com.example.robmillaci.go4lunch.data_objects;
 
+import com.example.robmillaci.go4lunch.activities.CallersEnum;
 import com.example.robmillaci.go4lunch.web_service.HtmlParser;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBufferResponse;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
 
-import static com.example.robmillaci.go4lunch.activities.MainActivity.GOOGLE_MAPS_FRAGMENT;
-import static com.example.robmillaci.go4lunch.activities.MainActivity.RESTAURANT_LIST_FRAGMENT;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.GOOGLE_MAPS_FRAGMENT;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.RESTAURANT_LIST_FRAGMENT;
 
 /**
  * This class is used to convert {@link com.google.android.gms.location.places.Place} into plain old java object Places
@@ -17,6 +20,7 @@ public class PojoPlace implements Serializable {
     public static final String PLACE_SERIALIZABLE_KEY = "PojoPlace"; //the key for storing and retrieving PojoPlace objects
     public static final String PLACE_ID_KEY = "placeID"; //the key for storing the place ID
     public static final String PLACE_NAME_KEY = "placeName"; //the key for storing the place name
+    private static final String NO_VALUE_FOUND = "Not available";
 
     private final String name;
     private final String address;
@@ -34,35 +38,27 @@ public class PojoPlace implements Serializable {
      * From these fragments we can deal with the slight timing delay it takes to parse the HTML as it doesnt affect UX<br>
      * Other fragments that call this constructor cannot deal with the timing delay as it causes visual stuttering. Therefore for these instances the place type is
      * parsed on a separate thread.
-     *
-     * @param name              name of the place
-     * @param address           address of the place
-     * @param website           website of the place
-     * @param phoneNumber       phone number of the place
-     * @param placeType         the place type
-     * @param rating            the rating of the place
-     * @param id                the id of the place
-     * @param latitude          the latitude of the place
-     * @param longitude         the longitude of the place
-     * @param callingFragmentId the fragment that called the creation of this place
      */
+    public PojoPlace(Place googlePlace, PlaceBufferResponse placeBufferResponse, Enum<CallersEnum> calledFrom) {
+        this.name = googlePlace.getName() == null ? NO_VALUE_FOUND : googlePlace.getName().toString();
+        this.address = googlePlace.getAddress() == null ? NO_VALUE_FOUND : googlePlace.getAddress().toString();
+        this.website = googlePlace.getWebsiteUri() == null ? NO_VALUE_FOUND : googlePlace.getWebsiteUri().toString();
+        this.phoneNumber = googlePlace.getPhoneNumber() == null ? NO_VALUE_FOUND : googlePlace.getPhoneNumber().toString();
 
-    public PojoPlace(String name, String address, String website, String phoneNumber, String placeType,
-                     float rating, String id, double latitude, double longitude, String callingFragmentId) {
-        this.name = name;
-        this.address = address;
-        this.website = website;
-        this.phoneNumber = phoneNumber;
-        this.rating = rating;
-        this.id = id;
-        this.longitude = longitude;
-        this.latitude = latitude;
-        this.placeType = placeType;
-        if (callingFragmentId.equals(RESTAURANT_LIST_FRAGMENT) || callingFragmentId.equals(GOOGLE_MAPS_FRAGMENT)) {
+        this.rating = googlePlace.getRating();
+        this.id = googlePlace.getId();
+        this.latitude = googlePlace.getLatLng().latitude;
+        this.longitude = googlePlace.getLatLng().longitude;
+
+        if (calledFrom.equals(RESTAURANT_LIST_FRAGMENT) || calledFrom.equals(GOOGLE_MAPS_FRAGMENT)) {
             parsePlaceType();
         }
 
+        if (placeBufferResponse != null && !placeBufferResponse.isClosed()) {
+            placeBufferResponse.close();
+        }
     }
+
 
     /**
      * see {@link HtmlParser#execute(Object[])} and {@link HtmlParser}
@@ -71,14 +67,18 @@ public class PojoPlace implements Serializable {
         String[] placeId = new String[]{this.id};
         try {
             this.placeType = new HtmlParser().execute(placeId).get();
-            this.placeParsed = true;
+            if (!placeType.equals(HtmlParser.DOWNLOAD_ERROR)) {
+                this.placeParsed = true;
+            } else {
+                this.placeType = "";
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public String getPlaceType() {
-        return placeType;
+        return placeType == null ? "" : placeType;
     }
 
     public String getId() {

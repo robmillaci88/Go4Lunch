@@ -66,7 +66,7 @@
     <string name="go4lunch">Go4Lunch</string>
     <string name="map_view">Map View</string>
     <string name="list_view">List View</string>
-    <string name="work_mates">Work Mates</string>
+    <string name="work_mates">Mates</string>
     <string name="liked">Liked</string>
     <string name="my_workmates">My Workmates</string>
     <string name="all_users">All Users</string>
@@ -89,8 +89,12 @@
     <string name="error_getting_reviews">Error getting pojoPlace reviews</string>
     <string name="no_reviews_found">No pojoPlace reviews found</string>
     <string name="friend_added">Friend added!</string>
-    <string name="no_places_found">Could not find any local pojoPlaces to eat!</string>
+    <string name="no_places_found">Could not find any local places to eat!</string>
     <string name="google_services_error">Google Services is not installed, up-to-date, or enabled</string>
     <string name="google_services_not_available">Google services not currently available</string>
     <string name="welcome">Welcome to Go4Lunch\u0020</string>
+    <string name="data_not_available">Not available</string>
+    <string name="retry">retry</string>
+    <string name="your_lunch_at">Your lunch is at\u0020</string>
+    <string name="error_getting_details">Error getting some place details, please check your network</string>
 </resources>

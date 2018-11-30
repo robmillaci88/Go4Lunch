@@ -53,11 +53,12 @@ public class StartActivity extends AppCompatActivity {
 
     private static FirebaseAuth mAuth; //The entry point of the Firebase Authentication SDK
 
-    static String loggedInUser; //the logged in user
-    static String loggedInEmail; //the logged in users email
-    static String loggedInPic; //the logged in users picture
+    public static String loggedInUser; //the logged in user
+    public static String loggedInEmail; //the logged in users email
+    public static String loggedInPic; //the logged in users picture
+    public static String loggedinUserId; //the logged in users picture
 
-    private CallbackManager callbackManager; //the loggin callback
+    private CallbackManager callbackManager; //the log in callback
     private GoogleSignInClient mGoogleSignInClient; //the GoogleSignInClient
 
 
@@ -82,6 +83,7 @@ public class StartActivity extends AppCompatActivity {
         facebookLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "onClick: called");
                 facebookLoginBtn.callOnClick();
             }
         });
@@ -91,6 +93,7 @@ public class StartActivity extends AppCompatActivity {
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
+                        Log.d(TAG, "onSuccess: called");
                         handleFacebookAccessToken(loginResult.getAccessToken());
                     }
 
@@ -167,16 +170,21 @@ public class StartActivity extends AppCompatActivity {
 
     //Handle the facebook access token and try to sign in with the Auth credentials
     private void handleFacebookAccessToken(AccessToken token) {
+        Log.d(TAG, "handleFacebookAccessToken: called");
+        Log.d(TAG, "handleFacebookAccessToken: token is " + token.getToken());
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "onComplete: called");
                         if (task.isSuccessful()) {
                             // Sign in success
+                            Log.d(TAG, "onComplete: sign in successful");
                             FirebaseUser user = mAuth.getCurrentUser(); //get the current user
 
                             if (user != null) {
+                                Log.d(TAG, "onComplete: user isnt null");
                                 FirebaseUserMetadata metadata = user.getMetadata();
                                 assert metadata != null;
                                 if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
@@ -239,11 +247,13 @@ public class StartActivity extends AppCompatActivity {
      * Once the user has been authenticated, log in and added to the database. launch the MainActivity
      */
     private void updateUI(FirebaseUser user) {
+        Log.d(TAG, "updateUI: calld");
         if (user != null) {
             Intent launchMain = new Intent(this, MainActivity.class);
             loggedInUser = mAuth.getCurrentUser().getDisplayName();
             loggedInEmail = mAuth.getCurrentUser().getEmail();
             loggedInPic = mAuth.getCurrentUser().getPhotoUrl().toString();
+            loggedinUserId = mAuth.getCurrentUser().getUid();
 
 
             startActivity(launchMain);

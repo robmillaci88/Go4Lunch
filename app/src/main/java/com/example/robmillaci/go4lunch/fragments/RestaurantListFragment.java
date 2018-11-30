@@ -26,7 +26,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 /**
  * This fragment is responsible for creating the restaurant list fragment displaying all places added to the map
  */
-public class RestaurantListFragment extends Fragment {
+public class RestaurantListFragment extends BaseFragment {
     private RestaurantListAdapter mAdaptor;//the adaptor for the history list view
 
 
@@ -89,7 +89,7 @@ public class RestaurantListFragment extends Fragment {
         }
         restaurantList.setBackgroundColor(getResources().getColor(R.color.white));
 
-        mAdaptor = new RestaurantListAdapter(POJOplaces, GoogleMapsFragment.getCurrentlocation(),RestaurantListFragment.this.getContext());
+        mAdaptor = new RestaurantListAdapter(POJOplaces, GoogleMapsFragment.getCurrentlocation(),null,RestaurantListFragment.this.getContext());
         restaurantList.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         RecyclerViewMods.setAnimation(restaurantList);
         restaurantList.setAdapter(mAdaptor);

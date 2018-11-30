@@ -22,7 +22,8 @@ import com.google.android.gms.location.places.PlaceBufferResponse;
 
 import java.util.ArrayList;
 
-import static com.example.robmillaci.go4lunch.activities.MainActivity.LIKED_RESTAURANT_FRAGMENT;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.LIKED_RESTAURANT_FRAGMENT;
+
 
 /**
  * This fragment is responsible for creating and displaying the users liked restaurants<br>
@@ -103,7 +104,7 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
 
     /**
      * Callback from {@link GoogleMapsFragment#getPlaceById(ArrayList, IgooglePlacescallback)}
-     * Converts the googlePlaces return inti PojoPlaces and creates and sets the recyclerview adapter to display liked places
+     * Converts the googlePlaces into PojoPlaces and creates and sets the recyclerview adapter to display liked places
      * * @param places the list of the returned places
      *
      * @param placesBuffer the placeBufferResponse so we can close it once we are finished
@@ -111,25 +112,26 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
     @SuppressWarnings("ConstantConditions")
     @Override
     public void gotplaces(ArrayList<Place> places, PlaceBufferResponse placesBuffer) {
-        ArrayList<PojoPlace> Pojoplaces = new ArrayList<>();
+        ArrayList<PojoPlace> pojoPlaces = new ArrayList<>();
         for (Place p : places) {
-            Pojoplaces.add(new PojoPlace(p.getName().toString(), p.getAddress().toString(),
-                    p.getWebsiteUri().toString(), p.getPhoneNumber().toString(),
-                    "", p.getRating(), p.getId(), p.getLatLng().latitude, p.getLatLng().longitude, LIKED_RESTAURANT_FRAGMENT));
-        }
-        if (placesBuffer != null) {
-            placesBuffer.close();
+            pojoPlaces.add(new PojoPlace(p, null, LIKED_RESTAURANT_FRAGMENT));
         }
 
-        if (Pojoplaces.size() == 0) {
+        if (pojoPlaces.size() == 0) {
             noLikedRestaurants.setVisibility(View.VISIBLE);
+            setRecyclerView(pojoPlaces, placesBuffer);
         } else {
             noLikedRestaurants.setVisibility(View.GONE);
-            mAdaptor = new RestaurantListAdapter(Pojoplaces, GoogleMapsFragment.getCurrentlocation(), placesBuffer, getContext());
-            likedRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            RecyclerViewMods.setAnimation(likedRecyclerView);
-            likedRecyclerView.setAdapter(mAdaptor);
+            setRecyclerView(pojoPlaces, placesBuffer);
         }
+        placesBuffer.close();
+    }
+
+    private void setRecyclerView(ArrayList<PojoPlace> places, PlaceBufferResponse placeBufferResponse) {
+        mAdaptor = new RestaurantListAdapter(places, GoogleMapsFragment.getCurrentlocation(), placeBufferResponse, getContext());
+        likedRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        RecyclerViewMods.setAnimation(likedRecyclerView);
+        likedRecyclerView.setAdapter(mAdaptor);
     }
 
 

@@ -21,7 +21,6 @@ import com.example.robmillaci.go4lunch.data_objects.PojoPlace;
 import com.example.robmillaci.go4lunch.data_objects.Users;
 import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.example.robmillaci.go4lunch.utils.RecyclerViewMods;
-import com.example.robmillaci.go4lunch.web_service.HtmlParser;
 import com.google.android.gms.location.places.PlaceBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -33,12 +32,11 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.robmillaci.go4lunch.activities.MainActivity.USER_LIST_FRAGMENT;
+import static com.example.robmillaci.go4lunch.activities.CallersEnum.USER_LIST_FRAGMENT;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * This class is responsible for creating the adaptor to display added users
- *
  */
 public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
     private ArrayList<Users> mUsersArrayList; //The list of added users
@@ -64,12 +62,11 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
     }
 
 
-
     @Override
     public void onBindViewHolder(
             @NonNull final RecyclerView.ViewHolder holder, final int position) {
 
-        final MyviewHolder myviewHolder = (MyviewHolder)holder;
+        final MyviewHolder myviewHolder = (MyviewHolder) holder;
         final Users user = mUsersArrayList.get(holder.getAdapterPosition()); //The user to be displayed this the relevant position
         myviewHolder.username.setText(user.getUsername()); //set the username
         myviewHolder.userEmail.setText(user.getUserEmail()); //set the user email
@@ -130,9 +127,9 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
     }
 
 
-
     /**
      * Calls {@link FirebaseHelper#getCurrentUserData()} to get the current users data and remove the ID of the user to be deleted from the friends list
+     *
      * @param holder the holder to remove when deleteUser is called. Removing the user from the recyclerview
      */
     private void deleteUser(final RecyclerView.ViewHolder holder) {
@@ -181,13 +178,10 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
     }
 
 
-
-
     @Override
     public int getItemCount() {
         return mUsersArrayList.size();
     }
-
 
 
     @Override
@@ -235,6 +229,7 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
         }
     }
 
+
     @Override
     public void finishedGettingPlace(final MyviewHolder myviewHolder, String s, String placeId) {
         if (s.equals("null")) {
@@ -252,70 +247,11 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
                                 @SuppressWarnings("ConstantConditions")
                                 @Override
                                 public void onClick(View v) {
-                                    String name,address,website,phoneNumber,id;
-                                    double latitude,longitude;
-                                    float rating = 0;
-
-                                    try {
-                                        name = foundPlace.getName().toString();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        name = mContext.getString(R.string.no_name_found);
-                                    }
-                                    try {
-                                        address = foundPlace.getAddress().toString();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        address = mContext.getString(R.string.no_address_found);
-                                    }
-                                    try {
-                                        website = foundPlace.getWebsiteUri().toString();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        website = mContext.getString(R.string.no_website_found);
-                                    }
-                                    try {
-                                        phoneNumber = foundPlace.getPhoneNumber().toString();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        phoneNumber = mContext.getString(R.string.no_phone_number);
-                                    }
-                                    try {
-                                        rating = foundPlace.getRating();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    try {
-                                        id = foundPlace.getId();
-                                    } catch (Exception e) {
-                                        id = "0";
-                                        e.printStackTrace();
-                                    }
-                                    try {
-                                        latitude = foundPlace.getLatLng().latitude;
-                                    } catch (Exception e) {
-                                        latitude = 0.00;
-                                        e.printStackTrace();
-                                    }
-                                    try {
-                                        longitude = foundPlace.getLatLng().longitude;
-                                    } catch (Exception e) {
-                                        longitude = 0.00;
-                                        e.printStackTrace();
-                                    }
-
-                                    String[] placeId = new String[]{foundPlace.getId()};
-                                    String placeType = "";
-                                    try {
-                                        placeType = new HtmlParser().execute(placeId[0]).get(); //using the placeID , parse the detailed place type
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
 
                                     Intent restaurantDetailPage = new Intent(getApplicationContext(), RestaurantActivity.class);
 
                                     restaurantDetailPage.putExtra(PojoPlace.PLACE_SERIALIZABLE_KEY,
-                                            new PojoPlace(name, address, website, phoneNumber, placeType, rating, id, latitude, longitude,USER_LIST_FRAGMENT));
+                                            new PojoPlace(foundPlace, response, USER_LIST_FRAGMENT));
 
                                     getApplicationContext().startActivity(restaurantDetailPage);
                                 }
@@ -326,7 +262,6 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
             });
         }
     }
-
 
 
     public static class MyviewHolder extends RecyclerView.ViewHolder {

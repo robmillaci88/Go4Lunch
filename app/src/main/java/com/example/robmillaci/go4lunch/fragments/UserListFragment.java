@@ -6,10 +6,10 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -147,7 +147,7 @@ public class UserListFragment extends BaseFragment {
         mAllUsersProgress.setVisibility(View.INVISIBLE);
         mMyWorkersProgress.setVisibility(View.VISIBLE);
         mMyWorkersProgress.setProgress(1);
-        mFirebaseHelper.getMyWorkUsers();
+        mFirebaseHelper.getMyWorkUsers(null);
     }
 
 
@@ -158,28 +158,27 @@ public class UserListFragment extends BaseFragment {
      */
     @Override
     public void datadownloadedcallback(ArrayList<Object> arrayList) {
-        mAllUsersProgress.setVisibility(View.INVISIBLE);
-        //noinspection unchecked
-        mAdaptor = null;
-        mAdaptorAll = new UsersListAdapter(arrayList, getApplicationContext()); //create the adapter for all users
-        RecyclerViewMods.setAnimation(mUsersList); //set the animation to the recycler view to enhance UX
-        mUsersList.setAdapter(mAdaptorAll); //set the adapter
-
         if (arrayList == null) {
             mFragmentView.setBackgroundResource(R.drawable.nousersfound); //if the returned results are null, display to the user that no users have been found
         } else {
             mFragmentView.setBackgroundResource(0);
+            mAllUsersProgress.setVisibility(View.INVISIBLE);
+            //noinspection unchecked
+            mAdaptor = null;
+            mAdaptorAll = new UsersListAdapter(arrayList, getApplicationContext()); //create the adapter for all users
+            RecyclerViewMods.setAnimation(mUsersList); //set the animation to the recycler view to enhance UX
+            mUsersList.setAdapter(mAdaptorAll); //set the adapter
         }
     }
 
 
     /**
-     * callback from {@link FirebaseHelper#getAddedUsers()}
+     * callback from {@link FirebaseHelper#getMyWorkUsers(Object o)}
      *
      * @param arrayList the returned results
      */
     @Override
-    public void workUsersDataCallback(ArrayList<Users> arrayList) {
+    public void workUsersDataCallback(ArrayList<Users> arrayList, Object o) {
         mMyWorkersProgress.setVisibility(View.INVISIBLE);
         mAdaptorAll = null;
 
@@ -194,7 +193,6 @@ public class UserListFragment extends BaseFragment {
             mFragmentView.setBackgroundResource(0);//remove the background
         }
     }
-
 
     //save the tab the user last selected so we can restore the same tab
     public void onPause() {

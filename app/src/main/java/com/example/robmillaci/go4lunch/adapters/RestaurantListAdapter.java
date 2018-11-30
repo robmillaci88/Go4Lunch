@@ -68,10 +68,10 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
     private final ArrayList<PojoPlace> origionalArray; //List to keep track of the origional place array
 
     private static final int NO_USERS = 0;
+    private static boolean parseErrorSent = false; //ensure we only send one parse error for place details, prevents multiple toast messages if multiple errors
 
 
     /**
-     * Two constructors, one when we use {@link com.google.android.gms.location.places.PlaceBufferResponse} in order to ensure the buffer is closed to prevent memory leaks
      *
      * @param pojoPlaces          the list of pojoPlaces
      * @param currentLocation the current users location
@@ -88,14 +88,6 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
             placesBuffer.close();
         }
     }
-
-    public RestaurantListAdapter(ArrayList<PojoPlace> pojoPlaces, LatLng currentLocation, Context context) {
-        this.mCurrentLocation = currentLocation;
-        this.mPojoPlaceArray = pojoPlaces;
-        this.origionalArray = pojoPlaces;
-        this.mContext = context;
-    }
-
 
     @NonNull
     @Override
@@ -350,14 +342,21 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
      * @param returnedObjects the objects returned from {@link HtmlParser}
      */
     @Override
-    public void parseComplete(Object... returnedObjects) {
-        try {
-            Object[] returnedViewHolderObject = (Object[]) returnedObjects[1]; //the Object[] returned
-            MyviewHolder holder = (MyviewHolder) returnedViewHolderObject[0]; //the viewholder object returned
-            mPojoPlaceArray.get(holder.getAdapterPosition()).setPlaceType((String) returnedObjects[0]); //the place type parsed and returned
-            mPojoPlaceArray.get(holder.getAdapterPosition()).setPlaceParsed(true); //set the place as parsed
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void parseComplete(String response, Object... returnedObjects) {
+        if (response.equals(HtmlParser.DOWNLOAD_OK)) {
+            try {
+                Object[] returnedViewHolderObject = (Object[]) returnedObjects[1]; //the Object[] returned
+                MyviewHolder holder = (MyviewHolder) returnedViewHolderObject[0]; //the viewholder object returned
+                mPojoPlaceArray.get(holder.getAdapterPosition()).setPlaceType((String) returnedObjects[0]); //the place type parsed and returned
+                mPojoPlaceArray.get(holder.getAdapterPosition()).setPlaceParsed(true); //set the place as parsed
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }else {
+            if (!parseErrorSent) {
+                Toast.makeText(mContext, "Error getting some place details, please check your network", Toast.LENGTH_LONG).show();
+                parseErrorSent = true;
+            }
         }
 
         ((Activity) mContext).runOnUiThread(new Runnable() { //run notifyDataSetChange() on the UI thread in order to make view changes

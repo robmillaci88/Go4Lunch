@@ -1,12 +1,16 @@
 package com.example.robmillaci.go4lunch.fragments;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.View;
 
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
 import com.example.robmillaci.go4lunch.adapters.UsersListAdapter;
 import com.example.robmillaci.go4lunch.data_objects.Users;
 import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
+import com.example.robmillaci.go4lunch.utils.NetworkInfoChecker;
 
 import java.util.ArrayList;
 
@@ -23,11 +27,7 @@ public abstract class BaseFragment extends Fragment implements FirebaseHelper.fi
     }
 
     @Override
-    public void workUsersDataCallback(ArrayList<Users> arrayList) {
-    }
-
-    @Override
-    public void finishedGettingUsers(String[] users, UsersListAdapter.MyviewHolder viewHolder) {
+    public void workUsersDataCallback(ArrayList<Users> arrayList, Object o) {
     }
 
     @Override
@@ -44,5 +44,14 @@ public abstract class BaseFragment extends Fragment implements FirebaseHelper.fi
 
     @Override
     public void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace) {
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (!NetworkInfoChecker.isNetworkAvailable(getActivity())) {
+            getActivity().finish();
+            getActivity().recreate();
+        }
     }
 }

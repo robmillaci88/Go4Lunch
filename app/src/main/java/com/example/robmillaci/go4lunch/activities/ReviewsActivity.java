@@ -1,5 +1,6 @@
 package com.example.robmillaci.go4lunch.activities;
 
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -36,9 +37,16 @@ public class ReviewsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reviews);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true); //adds the home button to the action bar to navigate back from this activity
+        }
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); //enables the home button
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(MainActivity.mNetworkStateReceiver, filter);
+
 
         mRecyclerView = findViewById(R.id.reviewsRecyclerView); //the recycler view to hold the reviews
 
@@ -106,6 +114,7 @@ public class ReviewsActivity extends AppCompatActivity {
         super.onBackPressed();
         finish();
     }
+
 }
 
 

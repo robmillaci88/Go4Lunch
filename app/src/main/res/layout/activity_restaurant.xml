@@ -15,7 +15,6 @@
         android:layout_height="65dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         app:backgroundTint="@color/cardview_light_background"
         app:layout_anchorGravity="bottom|end"
@@ -23,7 +22,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/restaurant_image"
         app:layout_constraintVertical_bias="0.74"
-        app:srcCompat="@drawable/checked" />
+        app:srcCompat="@drawable/add_restaurant" />
 
     <ImageView
         android:id="@+id/restaurant_image"
@@ -141,7 +140,23 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/action_tabs" />
+        app:layout_constraintTop_toBottomOf="@+id/action_tabs" >
+
+    </android.support.v7.widget.RecyclerView>
+
+    <ProgressBar
+        android:id="@+id/eaterprogressbar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/peopleEatingRecyclerView"
+        app:layout_constraintEnd_toEndOf="@+id/peopleEatingRecyclerView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/peopleEatingRecyclerView" />
 
     <ImageView
         android:id="@+id/backbtn"

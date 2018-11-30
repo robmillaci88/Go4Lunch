@@ -26,41 +26,47 @@ public class PhotoDownloader {
 
 
     public void getPhotos(String id, final GeoDataClient mGeoDataClient) {
-        final Bitmap[] bitmap = {null};
-        final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(id);
-        photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
-                // Get the list of photos.
-                PlacePhotoMetadataResponse photos = task.getResult();
-                // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
-                PlacePhotoMetadataBuffer photoMetadataBuffer = photos != null ? photos.getPhotoMetadata() : null;
-                // Get the first photo in the list. First check that the buffer contains at value
-                if (photoMetadataBuffer != null && photoMetadataBuffer.getCount() > 0) {
-                    PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
-                    // Get a full-size bitmap for the photo.
-                    Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
-                    photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
-                        @Override
-                        public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
-                            PlacePhotoResponse photo = task.getResult();
+        try {
+            final Bitmap[] bitmap = {null};
+            final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(id);
+            photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
+                @Override
+                public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
+                    try {  // Get the list of photos.
+                        PlacePhotoMetadataResponse photos = task.getResult();
+                        // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
+                        PlacePhotoMetadataBuffer photoMetadataBuffer = photos != null ? photos.getPhotoMetadata() : null;
+                        // Get the first photo in the list. First check that the buffer contains at value
+                        if (photoMetadataBuffer != null && photoMetadataBuffer.getCount() > 0) {
+                            PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
+                            // Get a full-size bitmap for the photo.
+                            Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
+                            photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                                @Override
+                                public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                                    PlacePhotoResponse photo = task.getResult();
 
-                            if (photo != null) {
-                                bitmap[0] = photo.getBitmap();
-                                if (bitmap[0] != null) {
-                                    mPhotoDownloadedCallback.photoReady(bitmap[0], mholder);
-                                } else {
-                                    mPhotoDownloadedCallback.photoReady(null, mholder);
+                                    if (photo != null) {
+                                        bitmap[0] = photo.getBitmap();
+                                        if (bitmap[0] != null) {
+                                            mPhotoDownloadedCallback.photoReady(bitmap[0], mholder);
+                                        } else {
+                                            mPhotoDownloadedCallback.photoReady(null, mholder);
+                                        }
+                                    }
                                 }
-                            }
+                            });
+                        } else {
+                            mPhotoDownloadedCallback.photoReady(null, mholder);
                         }
-                    });
-                } else {
-                    mPhotoDownloadedCallback.photoReady(null, mholder);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
-
+            });
+        }catch (Exception e){
+            mPhotoDownloadedCallback.photoReady(null, mholder);
+        }
     }
 }
 
