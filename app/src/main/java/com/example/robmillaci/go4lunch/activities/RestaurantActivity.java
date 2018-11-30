@@ -437,8 +437,13 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
         if (response.equals(HtmlParser.DOWNLOAD_OK)) {
             address.setText(String.format("%s - %s", value[0], mPojoPlace.getAddress()));
         } else {
-            address.setText(mPojoPlace.getAddress()!= null ? mPojoPlace.getAddress() : getString(R.string.no_address_found));
-            Toast.makeText(this, R.string.error_getting_details, Toast.LENGTH_LONG).show();
+            address.setText(mPojoPlace != null ? mPojoPlace.getAddress() : getString(R.string.no_address_found));
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(RestaurantActivity.this, R.string.error_getting_details, Toast.LENGTH_LONG).show();
+                }
+            });
         }
     }
 

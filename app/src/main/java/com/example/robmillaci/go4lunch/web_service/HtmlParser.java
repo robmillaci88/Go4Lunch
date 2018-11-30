@@ -35,13 +35,12 @@ public class HtmlParser extends AsyncTask<String, Void, String> {
         int startIndex = 0;
         int endIndex = 0;
 
-        boolean complete;
+        boolean complete = true;
         try {
             //Connect the to URL and get the elements by attribute "itemprop" with value "description"
             doc = Jsoup.connect(sb.toString()).get().getElementsByAttributeValue("itemprop", "description").get(0).toString();
             startIndex = doc.indexOf("·") + 1; //the start index to split the returned data
             endIndex = doc.indexOf("·", startIndex); //the end index to split the returned data
-            complete = true;
         } catch (Exception e) {
             e.printStackTrace();
             complete = false;
@@ -60,7 +59,7 @@ public class HtmlParser extends AsyncTask<String, Void, String> {
         if (complete) {
             return doc.substring(startIndex, endIndex).trim(); //if no callback is supplied, return the parsed string with the calling class using .get()
         }else {
-            return DOWNLOAD_ERROR; //if no callback is supplied, return the parsed string with the calling class using .get()
+            return DOWNLOAD_ERROR;
 
         }
     }

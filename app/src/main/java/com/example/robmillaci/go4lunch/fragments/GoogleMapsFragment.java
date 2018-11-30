@@ -281,8 +281,6 @@ public class GoogleMapsFragment extends BaseFragment implements
 
                                     relevantPlacesCount++; //increment the relevant places found count
 
-                                    findPlacesResponse(false); //No error so we can respond by just hiding the UI components displayed while searching. Also animates the camera
-
                                     addMarkersToMap(placeLikelihood.getPlace(), false); //Add the relevant places to the map
                                     mGoogleMap.setOnMarkerClickListener(GoogleMapsFragment.this); //sets the onMarkerClick listener
                                 }
@@ -400,7 +398,7 @@ public class GoogleMapsFragment extends BaseFragment implements
                 StartActivity.loggedInEmail, StartActivity.loggedInPic));
 
         for (Users u : arrayList) {
-            if (!u.getUserID().equals("")) {
+            if (!("").equals(u.getUserID())) {
                 firebaseHelper.getSelectedPlace(u.getUserID(), null);
             }
 
@@ -475,6 +473,7 @@ public class GoogleMapsFragment extends BaseFragment implements
         }
 
         allMarkers.put(marker.getTitle(), marker);
+        findPlacesResponse(false); //No error so we can respond by just hiding the UI components displayed while searching. Also animates the camera
 
         //creating the POJO places required HTML parsing which can slow down the main UI execution causing UX problems.
         //Handle the creation on a background thread to fix this issue and smooth out UX.
@@ -485,15 +484,6 @@ public class GoogleMapsFragment extends BaseFragment implements
 
                 mPlaces.put(pojoPlace.getName(), pojoPlace);
                 originalPlaces.put(pojoPlace.getName(), pojoPlace);
-
-//                we want to run this once the above code has completed in the new thread, but we have to make UI changes on the main thread.
-//                therefore refreshMarkers() is called in runOnUiThread() method
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshMarkers();
-                    }
-                });
 
             }
         }).start();
@@ -601,6 +591,8 @@ public class GoogleMapsFragment extends BaseFragment implements
 
                 PojoPlace thisPlace = mPlaces.get(markerId);
                 if (thisPlace != null) {
+                    Log.d("onResume", "refreshMarkers: place is " + thisPlace.getName() );
+
                     try {
                         if (selectedMarkers.contains(thisMarker)) { //if this is a selected marker re-add the marker with the icon set to marker_green
                             mOptions = new MarkerOptions()
@@ -627,6 +619,7 @@ public class GoogleMapsFragment extends BaseFragment implements
 
     @Override
     public void onResume() {
+        Log.d("onResume", "onResume: called");
         super.onResume();
         refreshMarkers(); //take account of any marker changes when this fragment is resumed
     }
