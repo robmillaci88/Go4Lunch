@@ -1,5 +1,8 @@
 package com.example.robmillaci.go4lunch.activities;
 
+/**
+ * Enum for determining which area of the applications called certain methods
+ */
 public enum CallersEnum {
         GOOGLE_MAPS_FRAGMENT,
         LIKED_RESTAURANT_FRAGMENT,

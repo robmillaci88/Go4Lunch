@@ -1,7 +1,6 @@
 package com.example.robmillaci.go4lunch.adapters;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -9,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -35,8 +33,6 @@ import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.example.robmillaci.go4lunch.utils.IphotoDownloadedCallback;
 import com.example.robmillaci.go4lunch.utils.PhotoDownloader;
 import com.example.robmillaci.go4lunch.web_service.GetDataService;
-import com.example.robmillaci.go4lunch.web_service.HtmlParser;
-import com.example.robmillaci.go4lunch.web_service.IhtmlParser;
 import com.example.robmillaci.go4lunch.web_service.ServiceGenerator;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceBufferResponse;
@@ -57,7 +53,6 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * Contains a list of {@link PojoPlace}
  */
 public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDownloadedCallback,
-        IhtmlParser,
         Filterable {
 
     private final LatLng mCurrentLocation; //the current location of the user, used to determin the distance to the restaurant
@@ -68,12 +63,10 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
     private final ArrayList<PojoPlace> origionalArray; //List to keep track of the origional place array
 
     private static final int NO_USERS = 0;
-    private static boolean parseErrorSent = false; //ensure we only send one parse error for place details, prevents multiple toast messages if multiple errors
 
 
     /**
-     *
-     * @param pojoPlaces          the list of pojoPlaces
+     * @param pojoPlaces      the list of pojoPlaces
      * @param currentLocation the current users location
      * @param placesBuffer    the placeBuffer to be closed
      * @param context         the calling class context
@@ -100,33 +93,21 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
         final PojoPlace pojoPlace = mPojoPlaceArray.get(holder.getAdapterPosition()); //the PojoPlace related to the adapters position
-        MyviewHolder myviewHolder = (MyviewHolder)holder;
+        MyviewHolder myviewHolder = (MyviewHolder) holder;
         myviewHolder.rest_title.setText(pojoPlace.getName()); //Set the pojoPlace title
         myviewHolder.phoneNumber.setText(pojoPlace.getPhoneNumber()); //set the pojoPlace phone number
         myviewHolder.ratingBar.setRating(pojoPlace.getRating()); //set the pojoPlace rating
         myviewHolder.vicinity.setText(String.format("%s - %s", pojoPlace.getPlaceType()
                 , pojoPlace.getAddress())); //set the pojoPlace type, additional information for pojoPlace type is retrieved below and updated once complete
 
-        if (!pojoPlace.isPlaceParsed()) { //if the pojoPlace is already parsed to determine its detailed pojoPlace type, the handle is skipped
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //using the pojoPlace ID parse the HTML from https://www.google.com/maps/search/ to determine the places detailed type
-                    new HtmlParser(RestaurantListAdapter.this, holder).execute(pojoPlace.getId());
-                }
-            }, 500); //wait half a second, this is because the callback of HTMLParser calls notifyDataSetChange which will cause issues with animations
-            //if run too early
-        }
 
         //see getAdditionalPlaceData method
         getAdditionalPlaceData(pojoPlace.getId(), myviewHolder);
-
 
         Uri websiteUrl = Uri.parse(pojoPlace.getWebsite());
         if (websiteUrl != null) {
             myviewHolder.website.setText(pojoPlace.getWebsite()); //set the places website
         }
-
 
         //now determine the distance from the current users location to the location of the pojoPlace
         double placeLat = pojoPlace.getLocation().latitude;
@@ -335,40 +316,6 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
     }
 
 
-    /**
-     * The callback from HTMLParser. See {@link HtmlParser}
-     * This is run on a separate thread and hence we have to use {@link Activity#runOnUiThread(Runnable)} to make view changes
-     *
-     * @param returnedObjects the objects returned from {@link HtmlParser}
-     */
-    @Override
-    public void parseComplete(String response, Object... returnedObjects) {
-        if (response.equals(HtmlParser.DOWNLOAD_OK)) {
-            try {
-                Object[] returnedViewHolderObject = (Object[]) returnedObjects[1]; //the Object[] returned
-                MyviewHolder holder = (MyviewHolder) returnedViewHolderObject[0]; //the viewholder object returned
-                mPojoPlaceArray.get(holder.getAdapterPosition()).setPlaceType((String) returnedObjects[0]); //the place type parsed and returned
-                mPojoPlaceArray.get(holder.getAdapterPosition()).setPlaceParsed(true); //set the place as parsed
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }else {
-            if (!parseErrorSent) {
-                Toast.makeText(mContext, "Error getting some place details, please check your network", Toast.LENGTH_LONG).show();
-                parseErrorSent = true;
-            }
-        }
-
-        ((Activity) mContext).runOnUiThread(new Runnable() { //run notifyDataSetChange() on the UI thread in order to make view changes
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
-
-
-    }
-
     static class MyviewHolder extends RecyclerView.ViewHolder {
         final ImageView placeImage;
         final TextView rest_title;
@@ -397,13 +344,14 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
             this.reviews = itemView.findViewById(R.id.reviews);
             this.numberOfEaters = itemView.findViewById(R.id.usersEatingHere);
         }
-    }
 
+    }
 
     /**
      * callback method from {@link FirebaseHelper#getUsersEatingHere(String, RecyclerView.ViewHolder)}
+     *
      * @param users the list of users eating at the specific restaurant
-     * @param v the viewHolder to be updated
+     * @param v     the viewHolder to be updated
      */
     @Override
     public void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v) {

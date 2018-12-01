@@ -37,13 +37,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     Map<String, String> recievedData;
     String messageFromUserId;
 
+    private static final String FROM_USER_ID_FIELD = "uId";
+    private static final String FROM_USER_NAME_FIELD = "msg";
+    private static final String FROM_USER_PIC = "picture_url";
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
         recievedData = remoteMessage.getData();
-        messageFromUserId = recievedData.get("uId");
-        Log.d("checkNewNotifications", "onMessageReceived: message from " + messageFromUserId);
+        messageFromUserId = recievedData.get(FROM_USER_ID_FIELD);
         sendNotification(recievedData);
     }
 
@@ -59,7 +62,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
                 .setContentTitle(getString(R.string.new_message_notification))
-                .setContentText(data.get("msg") + getString(R.string.new_message_from))
+                .setContentText(data.get(FROM_USER_NAME_FIELD) + getString(R.string.new_message_from))
                 .setAutoCancel(true)
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setContentIntent(pendingIntent)
@@ -71,12 +74,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setSmallIcon(R.drawable.lunch_icon);
 
         try {
-            String picture_url = data.get("picture_url");
+            String picture_url = data.get(FROM_USER_PIC);
             if (picture_url != null && !"".equals(picture_url)) {
                 URL url = new URL(picture_url);
                 Bitmap bigPicture = BitmapFactory.decodeStream(url.openConnection().getInputStream());
                 notificationBuilder.setStyle(
-                        new NotificationCompat.BigPictureStyle().bigPicture(bigPicture).setSummaryText(data.get("msg"))
+                        new NotificationCompat.BigPictureStyle().bigPicture(bigPicture).setSummaryText(data.get(FROM_USER_NAME_FIELD))
                 );
                 notificationBuilder.setLargeIcon(bigPicture);
             }

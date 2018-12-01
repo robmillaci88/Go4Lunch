@@ -188,18 +188,11 @@ public class ChatActivity extends AppCompatActivity implements FirebaseHelper.ch
         getChatData();
     }
 
-    // TODO: 23/11/2018 check if we actually need the below code
-//
-//    @Override
-//    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-//        outState.putBoolean("returnFromChat", true);
-//        super.onSaveInstanceState(outState, outPersistentState);
-//    }
     @Override
     protected void onPause() {
         try {
             this.unregisterReceiver(MainActivity.mNetworkStateReceiver);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         super.onPause();

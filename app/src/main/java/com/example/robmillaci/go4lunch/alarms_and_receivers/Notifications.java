@@ -16,6 +16,9 @@ import android.support.v4.app.NotificationCompat;
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.activities.MainActivity;
 
+/**
+ * Recieves a broadcast from {@link Alarm} and on receipt, creates and launches a notification
+ */
 public class Notifications extends BroadcastReceiver {
     public static final String PLACE_NAME = "placename";
     public static final String PLACE_IMAGE = "placeimageurl";

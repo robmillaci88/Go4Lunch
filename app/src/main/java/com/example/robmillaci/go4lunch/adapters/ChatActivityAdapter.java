@@ -42,7 +42,7 @@ public class ChatActivityAdapter extends RecyclerView.Adapter<ChatActivityAdapte
     }
 
 
-
+    //animations for the recyclerview items
     private void createAnimations() {
         sentAnimation = new TranslateAnimation(
                 Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f,

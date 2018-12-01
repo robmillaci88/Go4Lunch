@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 /**
  * The base activity of all activities implementing FirebaseHelper.firebaseDataCallback
+ * Also implements onResume to register a network state change listener and onPause to unregister the reciever
  */
 
 public abstract class BaseActivity extends AppCompatActivity implements FirebaseHelper.firebaseDataCallback {

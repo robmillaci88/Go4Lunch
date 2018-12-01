@@ -1,6 +1,7 @@
 package com.example.robmillaci.go4lunch.fragments;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -132,6 +133,13 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
         likedRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         RecyclerViewMods.setAnimation(likedRecyclerView);
         likedRecyclerView.setAdapter(mAdaptor);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mAdaptor.notifyDataSetChanged();
+            }
+        },1000);
     }
 
 

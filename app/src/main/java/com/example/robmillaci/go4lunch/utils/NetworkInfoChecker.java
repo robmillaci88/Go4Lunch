@@ -4,6 +4,9 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+/**
+ * Checks if we have a network connection available
+ */
 public class NetworkInfoChecker {
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

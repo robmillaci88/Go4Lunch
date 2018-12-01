@@ -67,7 +67,7 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
             @NonNull final RecyclerView.ViewHolder holder, final int position) {
 
         final MyviewHolder myviewHolder = (MyviewHolder) holder;
-        final Users user = mUsersArrayList.get(holder.getAdapterPosition()); //The user to be displayed this the relevant position
+        final Users user = mUsersArrayList.get(holder.getAdapterPosition()); //The user to be displayed in this position
         myviewHolder.username.setText(user.getUsername()); //set the username
         myviewHolder.userEmail.setText(user.getUserEmail()); //set the user email
 
@@ -143,7 +143,7 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
                     DocumentSnapshot d = documents.get(0); //get the document snapshow from the task results
 
                     try {
-                        addedUIds = (String) d.get("addedUsers"); //retrieve the String that relates to this users 'addedUsers'
+                        addedUIds = (String) d.get(FirebaseHelper.DATABASE_ADDED_USERS_FIELD); //retrieve the String that relates to this users 'addedUsers'
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -162,13 +162,13 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
                     }
 
                     if (newAddedUsers.toString().equals("")) { //if the newAddedUsers do not contain any values, we can remove this field from the database
-                        FirebaseHelper.deleteField("addedUsers");
+                        FirebaseHelper.deleteField(FirebaseHelper.DATABASE_ADDED_USERS_FIELD);
                     } else {
                         if (newAddedUsers.toString().substring(0, 1).equals(",")) {
                             //ensure there are no leading comma characters
                             newAddedUsers = newAddedUsers.replace(0, 1, "");
                         }
-                        FirebaseHelper.updateField("addedUsers", newAddedUsers.toString()); //Update the database with the new added users after removing the deleted user
+                        FirebaseHelper.updateField(FirebaseHelper.DATABASE_ADDED_USERS_FIELD, newAddedUsers.toString()); //Update the database with the new added users after removing the deleted user
                     }
                     mUsersArrayList.remove(mUsersArrayList.get(holder.getAdapterPosition())); //remove the deleted user from the arraylist
                     holder.itemView.startAnimation(RecyclerViewMods.createRemoveAnimation(AddedUsersAdapter.this, mContext));

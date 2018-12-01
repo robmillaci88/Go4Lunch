@@ -3,10 +3,8 @@ package com.example.robmillaci.go4lunch.activities;
 import android.Manifest;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -29,20 +27,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.robmillaci.go4lunch.R;
-import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
 import com.example.robmillaci.go4lunch.alarms_and_receivers.NetworkStateReceiver;
 import com.example.robmillaci.go4lunch.data_objects.PojoPlace;
-import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.example.robmillaci.go4lunch.fragments.GoogleMapsFragment;
 import com.example.robmillaci.go4lunch.fragments.LikedRestaurantsFragment;
 import com.example.robmillaci.go4lunch.fragments.RestaurantListFragment;
 import com.example.robmillaci.go4lunch.fragments.UserListFragment;
 import com.example.robmillaci.go4lunch.utils.NetworkInfoChecker;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.location.places.PlaceBufferResponse;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
@@ -52,10 +44,8 @@ import static android.support.design.widget.TabLayout.OnTabSelectedListener;
 import static android.support.design.widget.TabLayout.Tab;
 import static com.example.robmillaci.go4lunch.activities.CallersEnum.GOOGLE_MAPS_FRAGMENT;
 import static com.example.robmillaci.go4lunch.activities.CallersEnum.LIKED_RESTAURANT_FRAGMENT;
-import static com.example.robmillaci.go4lunch.activities.CallersEnum.NAV_DRAWER;
 import static com.example.robmillaci.go4lunch.activities.CallersEnum.RESTAURANT_LIST_FRAGMENT;
 import static com.example.robmillaci.go4lunch.activities.CallersEnum.USER_LIST_FRAGMENT;
-import static com.example.robmillaci.go4lunch.data_objects.PojoPlace.PLACE_SERIALIZABLE_KEY;
 
 /**
  * The mainActivity of this applications responsible for creation of<br>
@@ -66,15 +56,12 @@ import static com.example.robmillaci.go4lunch.data_objects.PojoPlace.PLACE_SERIA
  */
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String SHARED_PREFERENCE_TAB_KEY = "fragmentSelected"; //SharePrefs key for the selected fragment
+    public static NetworkStateReceiver mNetworkStateReceiver;
     private Tab mMapTab; //Map tap item that displays the GoogleMapsFragment
     private Tab mListTab; //Map tap item that displays the GoogleMapsFragment
     private Tab mFriendsTab; //Map tap item that displays the GoogleMapsFragment
     private Tab mLikedTab; //Map tap item that displays the GoogleMapsFragment
-
-
-    private static final String SHARED_PREFERENCE_TAB_KEY = "fragmentSelected"; //SharePrefs key for the selected fragment
-
-    public static NetworkStateReceiver mNetworkStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +75,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         Button tryAgainButton = findViewById(R.id.try_again_button);
 
 
-//        if (NetworkInfoChecker.isNetworkAvailable(this)) {
         if (!NetworkInfoChecker.isNetworkAvailable(this)) {
             noInternetImage.setVisibility(View.VISIBLE);
             tryAgainButton.setVisibility(View.VISIBLE);
@@ -191,11 +177,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             } else {
                 // do nothing - fragment is recreated automatically
             }
-
-//        }else {
-//            Toast.makeText(this,"A network connection is required to use this app",Toast.LENGTH_LONG).show();
-
-
         }
     }
 
@@ -292,9 +273,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         switch (item.getItemId()) {
             case R.id.menu_lunch: //Get the current selected place to eat using FireBaseHelper class and then calls back to 'finishGettingPlace'
                 item.setChecked(false);
-                FirebaseHelper firebaseHelper = new FirebaseHelper(this);
-                //noinspection ConstantConditions
-                firebaseHelper.getSelectedPlace(FirebaseAuth.getInstance().getCurrentUser().getUid(), null);
+                PojoPlace myPlace = GoogleMapsFragment.getEatingAtPlace();
+                if (myPlace == null) {
+                    Toast.makeText(this, "You haven't chosen a place to eat yet!", Toast.LENGTH_LONG).show();
+                } else {
+                    Intent restaurantDetailPage = new Intent(getApplicationContext(), RestaurantActivity.class);
+                    restaurantDetailPage.putExtra(PojoPlace.PLACE_SERIALIZABLE_KEY, myPlace);
+                    getApplicationContext().startActivity(restaurantDetailPage);
+                }
                 break;
 
             case R.id.menu_settings:
@@ -339,9 +325,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onPause() {
         super.onPause();
-        SharedPreferences.Editor spEditor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        spEditor.putString(SHARED_PREFERENCE_TAB_KEY, getVisibleFragmentTag());
-        spEditor.apply();
+//        SharedPreferences.Editor spEditor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+//        spEditor.putString(SHARED_PREFERENCE_TAB_KEY, getVisibleFragmentTag());
+//        spEditor.apply();
 
         try {
             this.unregisterReceiver(mNetworkStateReceiver);
@@ -357,17 +343,17 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     */
     @Override
     protected void onResume() {
-        try {
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-            String fragmentTag = sp.getString(SHARED_PREFERENCE_TAB_KEY, GOOGLE_MAPS_FRAGMENT.name());
-
-            if (fragmentTag.equals(RESTAURANT_LIST_FRAGMENT.name())) {
-                mMapTab.select();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+//            String fragmentTag = sp.getString(SHARED_PREFERENCE_TAB_KEY, GOOGLE_MAPS_FRAGMENT.name());
+//
+//            if (fragmentTag.equals(RESTAURANT_LIST_FRAGMENT.name())) {
+//                mMapTab.select();
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         super.onResume();
     }
 
@@ -377,7 +363,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      *
      * @return the currently visible fragments tag
      */
-    public String getVisibleFragmentTag() {
+    public String getVisibleFragmentTag() { //for tests
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
         List<Fragment> fragments = fragmentManager.getFragments();
         if (fragments != null) {
@@ -389,36 +375,4 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         return null;
     }
 
-
-    /**
-     * Uses the returned place ID to getPlaceByID from {@link Places}.<br>
-     * Once we have the PojoPlace, a {@link PojoPlace} is created and passed to {@link RestaurantActivity} intent<br>
-     *
-     * @param myviewHolder used in cases when callingback to a RecyclerView Adaptor to update the view holder
-     * @param s            the place name
-     * @param placeId      the place ID
-     */
-    @Override
-    public void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId) {
-        if (s.equals("null")) {
-            Toast.makeText(this, R.string.no_restaurant_selected, Toast.LENGTH_SHORT).show();
-        } else {
-            Places.getGeoDataClient(this).getPlaceById(placeId).addOnCompleteListener(new OnCompleteListener<PlaceBufferResponse>() {
-                @SuppressWarnings("ConstantConditions")
-                @Override
-                public void onComplete(@NonNull Task<PlaceBufferResponse> task) {
-                    if (task.isSuccessful()) {
-                        PlaceBufferResponse placeBufferResponse = task.getResult();
-                        com.google.android.gms.location.places.Place p = placeBufferResponse.get(0);
-
-                        Intent restaurantDetailPage = new Intent(getApplicationContext(), RestaurantActivity.class);
-                        restaurantDetailPage.putExtra(PLACE_SERIALIZABLE_KEY,
-                                new PojoPlace(p, placeBufferResponse, NAV_DRAWER));
-
-                        getApplicationContext().startActivity(restaurantDetailPage);
-                    }
-                }
-            });
-        }
-    }
 }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,8 +28,6 @@ import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.example.robmillaci.go4lunch.fragments.GoogleMapsFragment;
 import com.example.robmillaci.go4lunch.utils.IphotoDownloadedCallback;
 import com.example.robmillaci.go4lunch.utils.PhotoDownloader;
-import com.example.robmillaci.go4lunch.web_service.HtmlParser;
-import com.example.robmillaci.go4lunch.web_service.IhtmlParser;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -44,7 +43,7 @@ import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_S
 /**
  * This activity is responsible for displaying the details of a specific place
  */
-public class RestaurantActivity extends BaseActivity implements IphotoDownloadedCallback, IhtmlParser {
+public class RestaurantActivity extends BaseActivity implements IphotoDownloadedCallback {
 
     public static final String MARKER_UNSELECTED = "notSelected"; //Tag for marker when the marker is 'unselected' as place the user is eating
     public static final String MARKER_SELECTED = "selected"; //Tag for marker when the marker is 'selected' as place the user is eating
@@ -101,6 +100,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
         starLikeTab = tabs.getTabAt(1); //The tab to 'like' this place
 
         Bundle data = getIntent().getExtras();
+
         if (data != null) {
             mPojoPlace = (PojoPlace) data.getSerializable(PLACE_SERIALIZABLE_KEY); //Restore the place passed to this activity in the calling intent
         }
@@ -149,6 +149,8 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
                     mMarker.setTag(MARKER_SELECTED);
                     isItSelected = true;
 
+                    GoogleMapsFragment.setEatingAtPlace(mPojoPlace);
+
                     Alarm.scheduleAlarm(RestaurantActivity.this, mPojoPlace.getName(), placeImage, mPojoPlace.getAddress(), usersEatingHere);
 
                     firebaseHelper.getSelectedPlace(FirebaseHelper.getmCurrentUserId(), null); //method calls back to 'finishedGettingPlace'
@@ -166,6 +168,8 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
                     Alarm.cancelAlarm(RestaurantActivity.this);
 
                     firebaseHelper.getUsersEatingHere(mPojoPlace.getId(), null); //now we have unselected this place, refresh the list of users 'eating here'
+
+                    GoogleMapsFragment.setEatingAtPlace(null); //removed the cached eating place
 
                     if (!isItSelectedByOthers) { //we only want to change the markers tag and icon is no other friends have selected this place
                         mMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
@@ -220,21 +224,39 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
 
     /**
      * Retrieves additional place data that is not available with GooglePlacesAPI SDK <br>
-     * {@link com.example.robmillaci.go4lunch.web_service.HtmlParser} extracts the place detailed 'type' from  https://www.google.com/maps/search/ <br>
      * {@link com.example.robmillaci.go4lunch.utils.PhotoDownloader} downloads and returns the place image bitmap <br>
      * {@link com.example.robmillaci.go4lunch.firebase.FirebaseHelper#getUsersEatingHere(String, RecyclerView.ViewHolder)} returns the users eating at this place <br>
      * {@link com.example.robmillaci.go4lunch.firebase.FirebaseHelper#isItLiked(String)} returns wether this place is 'liked' by the user <br>
      */
     private void getAdditionalPlaceData() {
-        String[] placeId = new String[]{placeID};
-        new HtmlParser(this).execute(placeId[0]);
+
+        firebaseHelper.isItLiked(placeID);
 
         photoDownloader.getPhotos(placeID, Places.getGeoDataClient(this));
 
         eaterprogressbar.setVisibility(View.VISIBLE);
         eaterprogressbar.setProgress(1);
+
+        /**
+         * the place type needs to be retrieved from {@link com.example.robmillaci.go4lunch.web_service.FourSquareAPI#getPlaceType(String, String)}
+         * Therefore we need a slight delay before updating the UI
+         */
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView address = findViewById(R.id.restaurant_address);//the place address
+                        address.setText(String.format("%s - %s", mPojoPlace.getPlaceType(), mPojoPlace.getAddress()));
+                    }
+                });
+
+            }
+        },1000);
+
+
         firebaseHelper.getUsersEatingHere(placeID, null);
-        firebaseHelper.isItLiked(placeID);
     }
 
 
@@ -340,7 +362,10 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
      */
     @Override
     public void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v) {
-        Log.d("check", "finishGettingUsersEatingHere: called");
+        Log.d("EATERS", "finishGettingUsersEatingHere: finished getting users eating here");
+        for (Users u : users){
+            Log.d("EATERS", "finishGettingUsersEatingHere: user is " + u.getUsername());
+        }
         usersEatingHere = new String[users.size()];
 
         for (int i = 0; i < users.size(); i++) {
@@ -426,26 +451,6 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
     }
 
 
-    /**
-     * callback from {@link com.example.robmillaci.go4lunch.web_service.HtmlParser} to update the UI with the place detaild type
-     *
-     * @param value the returned objects from this method
-     */
-    @Override
-    public void parseComplete(String response, Object... value) {
-        TextView address = findViewById(R.id.restaurant_address);
-        if (response.equals(HtmlParser.DOWNLOAD_OK)) {
-            address.setText(String.format("%s - %s", value[0], mPojoPlace.getAddress()));
-        } else {
-            address.setText(mPojoPlace != null ? mPojoPlace.getAddress() : getString(R.string.no_address_found));
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(RestaurantActivity.this, R.string.error_getting_details, Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    }
 
 }
 

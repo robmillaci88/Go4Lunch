@@ -5,23 +5,39 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import java.util.Calendar;
 
+/**
+ * Creates an alarm that will notify the user of their selected place to eat at midday.
+ * Sends the place name, the place image, the place address and the users eating here to {@link Notifications}
+ */
 public class Alarm {
     private static AlarmManager alarm;
 
-
     public static void scheduleAlarm(Context mcontext, String placeName, Bitmap placeImage, String placeAddress, String[] usersEating) {
+        int hourNow = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        long scheduleTime;
 
-        // Create a calendar object that is set to 12pm the same day
-        Calendar c = Calendar.getInstance();
-        c.add(Calendar.DATE, 0);
-        c.set(Calendar.HOUR_OF_DAY, 12);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        long scheduleTime = c.getTimeInMillis();
+        if (hourNow > 12) {//it is past midday so set the alarm for the next day
+            // Create a calendar object that is set to 12pm the same day
+            Calendar c = Calendar.getInstance();
+            c.add(Calendar.DATE, 1);
+            c.set(Calendar.HOUR_OF_DAY, 12);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            scheduleTime = c.getTimeInMillis();
+        }else{ //its not midday yet, so set the alarm for midday
+            Calendar c = Calendar.getInstance();
+            c.add(Calendar.DATE, 0);
+            c.set(Calendar.HOUR_OF_DAY, 12);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            scheduleTime = c.getTimeInMillis();
+        }
 
         // Create an Intent and set the class that will execute when the Alarm triggers. Here we have
         // specified the notifications class in the Intent. The onReceive() method of this class will execute when the broadcast from the alarm is received.

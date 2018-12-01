@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.robmillaci.go4lunch.R;
+import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -105,10 +106,9 @@ public class StartActivity extends AppCompatActivity {
                     @Override
                     public void onError(FacebookException exception) {
                         Log.d(TAG, "onError: " + exception);
-                        Toast.makeText(getApplicationContext(),"Authentication error",Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Authentication error", Toast.LENGTH_LONG).show();
                     }
                 });
-
 
 
         //build the google sign in options, passing in the ID token
@@ -158,7 +158,7 @@ public class StartActivity extends AppCompatActivity {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             // Signed in successfully, show authenticated UI.
-            if (account!=null) {
+            if (account != null) {
                 firebaseAuthWithGoogle(account);
             }
         } catch (ApiException e) {
@@ -170,21 +170,16 @@ public class StartActivity extends AppCompatActivity {
 
     //Handle the facebook access token and try to sign in with the Auth credentials
     private void handleFacebookAccessToken(AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken: called");
-        Log.d(TAG, "handleFacebookAccessToken: token is " + token.getToken());
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "onComplete: called");
                         if (task.isSuccessful()) {
                             // Sign in success
-                            Log.d(TAG, "onComplete: sign in successful");
                             FirebaseUser user = mAuth.getCurrentUser(); //get the current user
 
                             if (user != null) {
-                                Log.d(TAG, "onComplete: user isnt null");
                                 FirebaseUserMetadata metadata = user.getMetadata();
                                 assert metadata != null;
                                 if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
@@ -198,7 +193,6 @@ public class StartActivity extends AppCompatActivity {
                                 updateUI(user);
                             } else {
                                 // If sign in fails, display a message to the user.
-                                Log.w(TAG, "signInWithCredential:failure", task.getException());
                                 Toast.makeText(StartActivity.this, R.string.auth_failed,
                                         Toast.LENGTH_SHORT).show();
                                 updateUI(null);
@@ -232,7 +226,6 @@ public class StartActivity extends AppCompatActivity {
                                 updateUI(user);
                             } else {
                                 // If sign in fails, display a message to the user.
-                                Log.w(TAG, "signInWithCredential:failure", task.getException());
                                 Toast.makeText(StartActivity.this, R.string.auth_failed,
                                         Toast.LENGTH_SHORT).show();
                             }
@@ -247,7 +240,6 @@ public class StartActivity extends AppCompatActivity {
      * Once the user has been authenticated, log in and added to the database. launch the MainActivity
      */
     private void updateUI(FirebaseUser user) {
-        Log.d(TAG, "updateUI: calld");
         if (user != null) {
             Intent launchMain = new Intent(this, MainActivity.class);
             loggedInUser = mAuth.getCurrentUser().getDisplayName();
@@ -272,6 +264,7 @@ public class StartActivity extends AppCompatActivity {
     /**
      * Add the user to the database if they are a new user. Adding username, useremail,picture and unique ID<br>
      * Also gets the users device token and stores this in the user record in the database
+     *
      * @param fbUser the user to be added
      */
     private void addUserToDB(final FirebaseUser fbUser) {
@@ -280,12 +273,12 @@ public class StartActivity extends AppCompatActivity {
 
         Map<String, Object> data = new HashMap<>();
 
-        data.put("username", fbUser.getDisplayName());
-        data.put("userEmail", fbUser.getEmail());
+        data.put(FirebaseHelper.DATABASE_NAME_FIELD, fbUser.getDisplayName());
+        data.put(FirebaseHelper.DATABASE_EMAIL_FIELD, fbUser.getEmail());
         //noinspection ConstantConditions
-        data.put("picture", (fbUser.getPhotoUrl().toString()));
-        data.put("uniqueID", fbUser.getUid());
-        mFirebaseDatabase.collection("users").document(fbUser.getUid()).set(data);
+        data.put(FirebaseHelper.DATABASE_PICTURE_FIELD, (fbUser.getPhotoUrl().toString()));
+        data.put(FirebaseHelper.DATABASE_UNIQUE_ID_FIELD, fbUser.getUid());
+        mFirebaseDatabase.collection(FirebaseHelper.DATABASE_COLLECTION_PATH).document(fbUser.getUid()).set(data);
 
 
         FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
@@ -294,8 +287,8 @@ public class StartActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     @SuppressWarnings("ConstantConditions") String idToken = task.getResult().getToken();
                     Map<String, Object> data = new HashMap<>();
-                    data.put("token", idToken);
-                    mFirebaseDatabase.collection("users").document(fbUser.getUid()).update(data);
+                    data.put(FirebaseHelper.DATABASE_TOKEN_PATH, idToken);
+                    mFirebaseDatabase.collection(FirebaseHelper.DATABASE_COLLECTION_PATH).document(fbUser.getUid()).update(data);
                     addUserTestData(data, mFirebaseDatabase);
                 }
             }
