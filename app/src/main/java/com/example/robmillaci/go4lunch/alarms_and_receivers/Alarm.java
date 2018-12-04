@@ -5,7 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.util.Log;
+import android.telecom.Call;
 
 import java.util.Calendar;
 
@@ -18,10 +18,11 @@ public class Alarm {
 
     public static void scheduleAlarm(Context mcontext, String placeName, Bitmap placeImage, String placeAddress, String[] usersEating) {
         int hourNow = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        int minuteNow = Calendar.getInstance().get(Calendar.MINUTE);
         long scheduleTime;
 
-        if (hourNow > 12) {//it is past midday so set the alarm for the next day
-            // Create a calendar object that is set to 12pm the same day
+        if (hourNow >= 12 && minuteNow > 1) {//it is past midday so set the alarm for the next day
+            // Create a calendar object that is set to 12pm the next day
             Calendar c = Calendar.getInstance();
             c.add(Calendar.DATE, 1);
             c.set(Calendar.HOUR_OF_DAY, 12);
@@ -29,7 +30,7 @@ public class Alarm {
             c.set(Calendar.SECOND, 0);
             c.set(Calendar.MILLISECOND, 0);
             scheduleTime = c.getTimeInMillis();
-        }else{ //its not midday yet, so set the alarm for midday
+        } else { //its not midday yet, so set the alarm for midday
             Calendar c = Calendar.getInstance();
             c.add(Calendar.DATE, 0);
             c.set(Calendar.HOUR_OF_DAY, 12);

@@ -23,8 +23,6 @@ import com.google.android.gms.location.places.PlaceBufferResponse;
 
 import java.util.ArrayList;
 
-import static com.example.robmillaci.go4lunch.activities.CallersEnum.LIKED_RESTAURANT_FRAGMENT;
-
 
 /**
  * This fragment is responsible for creating and displaying the users liked restaurants<br>
@@ -34,6 +32,7 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
     private RecyclerView likedRecyclerView;
     private RestaurantListAdapter mAdaptor;
     private ImageView noLikedRestaurants;
+    private ArrayList<PojoPlace> pojoPlaces;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,6 +50,7 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
     @SuppressWarnings("ConstantConditions")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        pojoPlaces = new ArrayList<>();
         likedRecyclerView = view.findViewById(R.id.likedRecyclerView);
         noLikedRestaurants = view.findViewById(R.id.no_liked_places_found);
         noLikedRestaurants.setVisibility(View.GONE);
@@ -113,9 +113,8 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
     @SuppressWarnings("ConstantConditions")
     @Override
     public void gotplaces(ArrayList<Place> places, PlaceBufferResponse placesBuffer) {
-        ArrayList<PojoPlace> pojoPlaces = new ArrayList<>();
         for (Place p : places) {
-            pojoPlaces.add(new PojoPlace(p, null, LIKED_RESTAURANT_FRAGMENT));
+            pojoPlaces.add(new PojoPlace(p, null));
         }
 
         if (pojoPlaces.size() == 0) {
@@ -139,7 +138,7 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
             public void run() {
                 mAdaptor.notifyDataSetChanged();
             }
-        },1000);
+        }, 1000);
     }
 
 
@@ -151,4 +150,7 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
         }
     }
 
+    public ArrayList<PojoPlace> getPojoPlaces() {
+        return pojoPlaces;
+    }
 }

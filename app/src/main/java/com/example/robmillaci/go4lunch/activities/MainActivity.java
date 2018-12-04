@@ -10,7 +10,6 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -29,6 +28,7 @@ import android.widget.Toast;
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.alarms_and_receivers.NetworkStateReceiver;
 import com.example.robmillaci.go4lunch.data_objects.PojoPlace;
+import com.example.robmillaci.go4lunch.fragments.BaseFragment;
 import com.example.robmillaci.go4lunch.fragments.GoogleMapsFragment;
 import com.example.robmillaci.go4lunch.fragments.LikedRestaurantsFragment;
 import com.example.robmillaci.go4lunch.fragments.RestaurantListFragment;
@@ -38,14 +38,8 @@ import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
-
 import static android.support.design.widget.TabLayout.OnTabSelectedListener;
 import static android.support.design.widget.TabLayout.Tab;
-import static com.example.robmillaci.go4lunch.activities.CallersEnum.GOOGLE_MAPS_FRAGMENT;
-import static com.example.robmillaci.go4lunch.activities.CallersEnum.LIKED_RESTAURANT_FRAGMENT;
-import static com.example.robmillaci.go4lunch.activities.CallersEnum.RESTAURANT_LIST_FRAGMENT;
-import static com.example.robmillaci.go4lunch.activities.CallersEnum.USER_LIST_FRAGMENT;
 
 /**
  * The mainActivity of this applications responsible for creation of<br>
@@ -56,7 +50,6 @@ import static com.example.robmillaci.go4lunch.activities.CallersEnum.USER_LIST_F
  */
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private static final String SHARED_PREFERENCE_TAB_KEY = "fragmentSelected"; //SharePrefs key for the selected fragment
     public static NetworkStateReceiver mNetworkStateReceiver;
     private Tab mMapTab; //Map tap item that displays the GoogleMapsFragment
     private Tab mListTab; //Map tap item that displays the GoogleMapsFragment
@@ -81,7 +74,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             tryAgainButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    finish();
                     recreate();
                 }
             });
@@ -171,12 +163,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 }
             });
 
+
+            createGoogleMapsFragment();
+
             //noinspection StatementWithEmptyBody
-            if (savedInstanceState == null) {
-                createGoogleMapsFragment();
-            } else {
-                // do nothing - fragment is recreated automatically
-            }
+//            if (savedInstanceState == null) {
+//                createGoogleMapsFragment();
+//            } else {
+//                // do nothing - fragment is recreated automatically
+//            }
         }
     }
 
@@ -188,7 +183,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         final LikedRestaurantsFragment likedRestaurantsFragment = new LikedRestaurantsFragment();
         FragmentManager manager = this.getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.fragment_container, likedRestaurantsFragment, LIKED_RESTAURANT_FRAGMENT.name());
+        transaction.replace(R.id.fragment_container, likedRestaurantsFragment, String.valueOf(BaseFragment.LIKED_RESTAURANT_FRAGMENT));
         transaction.addToBackStack(null);
         transaction.commit();
     }
@@ -202,7 +197,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         final UserListFragment friendsFragment = new UserListFragment();
         FragmentManager manager = this.getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.fragment_container, friendsFragment, USER_LIST_FRAGMENT.name());
+        transaction.replace(R.id.fragment_container, friendsFragment, String.valueOf(BaseFragment.USER_LIST_FRAGMENT));
         transaction.addToBackStack(null);
         transaction.commit();
     }
@@ -222,7 +217,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             final GoogleMapsFragment mapsFragment = new GoogleMapsFragment();
             FragmentManager manager = this.getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            transaction.replace(R.id.fragment_container, mapsFragment, GOOGLE_MAPS_FRAGMENT.name());
+            transaction.replace(R.id.fragment_container, mapsFragment, String.valueOf(BaseFragment.GOOGLE_MAPS_FRAGMENT));
             transaction.addToBackStack(null);
             transaction.commit();
         }
@@ -242,7 +237,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             final RestaurantListFragment listFragment = new RestaurantListFragment();
             FragmentManager manager = this.getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            transaction.replace(R.id.fragment_container, listFragment, RESTAURANT_LIST_FRAGMENT.name());
+            transaction.replace(R.id.fragment_container, listFragment, String.valueOf(BaseFragment.RESTAURANT_LIST_FRAGMENT));
             transaction.commit();
         }
     }
@@ -271,11 +266,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         switch (item.getItemId()) {
-            case R.id.menu_lunch: //Get the current selected place to eat using FireBaseHelper class and then calls back to 'finishGettingPlace'
+            case R.id.menu_lunch: //Get the current selected place to eat u
                 item.setChecked(false);
-                PojoPlace myPlace = GoogleMapsFragment.getEatingAtPlace();
+                PojoPlace myPlace = GoogleMapsFragment.getEatingAtPlace(getApplicationContext()); //retrieve the users selected place to eat
                 if (myPlace == null) {
-                    Toast.makeText(this, "You haven't chosen a place to eat yet!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.no_place_selected_yet, Toast.LENGTH_LONG).show(); //if not place is selected show a toast
                 } else {
                     Intent restaurantDetailPage = new Intent(getApplicationContext(), RestaurantActivity.class);
                     restaurantDetailPage.putExtra(PojoPlace.PLACE_SERIALIZABLE_KEY, myPlace);
@@ -285,6 +280,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
             case R.id.menu_settings:
                 item.setChecked(false);
+                startActivity(new Intent(this,SettingsActivity.class));
                 break;
 
             case R.id.menu_logout: //Logs the current user out of the application, returning them to the StartActivity
@@ -325,54 +321,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onPause() {
         super.onPause();
-//        SharedPreferences.Editor spEditor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-//        spEditor.putString(SHARED_PREFERENCE_TAB_KEY, getVisibleFragmentTag());
-//        spEditor.apply();
-
         try {
             this.unregisterReceiver(mNetworkStateReceiver);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
-    /*
-    When this activity is resumed, retrieved the previously selected tab, unless the user is viewing the RestaurantListFragment,
-    in that case reload GoogleMapsFragment
-    */
-    @Override
-    protected void onResume() {
-//        try {
-//            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-//            String fragmentTag = sp.getString(SHARED_PREFERENCE_TAB_KEY, GOOGLE_MAPS_FRAGMENT.name());
-//
-//            if (fragmentTag.equals(RESTAURANT_LIST_FRAGMENT.name())) {
-//                mMapTab.select();
-//            }
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        super.onResume();
-    }
-
-
-    /**
-     * Searchs through all fragments and IF one of the found fragments is visible, return its tag
-     *
-     * @return the currently visible fragments tag
-     */
-    public String getVisibleFragmentTag() { //for tests
-        FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
-        List<Fragment> fragments = fragmentManager.getFragments();
-        if (fragments != null) {
-            for (Fragment fragment : fragments) {
-                if (fragment != null && fragment.isVisible())
-                    return fragment.getTag();
-            }
-        }
-        return null;
-    }
-
 }

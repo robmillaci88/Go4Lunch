@@ -1,11 +1,9 @@
 package com.example.robmillaci.go4lunch.web_service;
 
-import com.example.robmillaci.go4lunch.data_objects.FourSquareDataObjects.Response;
 import com.example.robmillaci.go4lunch.data_objects.places_details.RawData;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface GetDataService {
@@ -22,7 +20,7 @@ public interface GetDataService {
             @Query("key") String apiKey);
 
     @GET("venues/search?")
-    Call<com.example.robmillaci.go4lunch.data_objects.FourSquareDataObjects.RawData> get4squareDetail(
+    Call<com.example.robmillaci.go4lunch.data_objects.four_square_data_objects.RawData> get4squareDetail(
             @Query("ll") String latLong,
             @Query("client_id") String clientId,
             @Query("client_secret") String clientSecret,

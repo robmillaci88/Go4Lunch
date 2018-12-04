@@ -90,4 +90,7 @@
     <string name="retry">retry</string>
     <string name="your_lunch_at">Tu almuerzo es a las\u0020</string>
     <string name="error_getting_details">Error al obtener algunos detalles del lugar, por favor revise su red</string>
+    <string name="no_place_selected_yet">Aún no has elegido un lugar para comer!</string>
+    <string name="marker_already_added">Este marcador ya se ha añadido al mapa.</string>
+
 </resources>

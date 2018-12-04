@@ -469,6 +469,7 @@ public class FirebaseHelper {
 
     /**
      * Gets the passed users selected place
+     *
      * @param userId the user id to search for
      * @param holder the viewholder object to be passed back in the callback
      */
@@ -511,17 +512,13 @@ public class FirebaseHelper {
         FirebaseHelper.getCurrentUserData().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                Log.d("EATERS", "onComplete: ");
                 final ArrayList<Users> friendsEatingHere = new ArrayList<>(); //To hold those users that are eating at this place
                 final HashSet<String> usersHashSet = new HashSet<>(); //to 100% ensure we have no duplicates
                 if (task.isSuccessful()) {
-                    Log.d("EATERS", "onComplete: task successfull ");
-
                     final QuerySnapshot taskResults = task.getResult();
                     List<DocumentSnapshot> documents = taskResults.getDocuments();
                     String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(","); //split the returned users CSV string into a String[]
                     //noinspection unchecked
-                    Log.d("EATERS", "onComplete: added user are " + addedUsers);
 
                     usersHashSet.addAll(Arrays.asList(addedUsers)); //to 100% ensure no duplicates
                     final ArrayList<String> addedUsersArray = new ArrayList<>(usersHashSet); //create an arraylist of added user id's to loop through each one
@@ -533,9 +530,6 @@ public class FirebaseHelper {
                     if (addedUsers.length > 0) {
                         for (String s : addedUsersArray) {
 
-                            Log.d("EATERS", "onComplete: looping through users");
-                            Log.d("EATERS", "onComplete: checking user " + s);
-
                             FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH)
                                     .document(s)
                                     .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() { //get the friends document
@@ -543,14 +537,12 @@ public class FirebaseHelper {
                                 @Override
                                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                     count[0]--;//reduce the count so we know when we have checked every user
-                                    Log.d("EATERS", "onComplete: count is " + count[0]);
+
                                     if (task.isSuccessful() && task != null) {
-                                        Log.d("EATERS", "onComplete: task is successfull");
 
                                         DocumentSnapshot taskResults = task.getResult();
                                         try {
                                             if (taskResults != null) {
-                                                Log.d("EATERS", "onComplete: task is not null");
 
                                                 String selectedPlaceId =
                                                         taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString(); //extract the friends selected place id
@@ -563,7 +555,6 @@ public class FirebaseHelper {
 
                                                     friendsEatingHere.add(new Users(name, id, email, picture)); //add the user object to an arraylist for returning
                                                 }
-                                                Log.d("EATERS", "onComplete: count check");
 
                                                 if (count[0] == 0) { //if we have looped through every friend, callback the results
                                                     mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
@@ -579,7 +570,7 @@ public class FirebaseHelper {
                                 }
                             });
                         }
-                    }else {
+                    } else {
                         mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
                     }
                 } else { //if the task isnt successful, callback with an Array of size 0
@@ -602,7 +593,8 @@ public class FirebaseHelper {
 
     /**
      * Adds users chat data to the database
-     * @param chatData - Map holding the chat data
+     *
+     * @param chatData   - Map holding the chat data
      * @param chattingTo - the user the recieving the chat data
      */
     public void addChatData(final Map<String, Object> chatData, final String chattingTo) {
@@ -631,7 +623,8 @@ public class FirebaseHelper {
 
     /**
      * Returns the chat data for the current user. Calls {@link #getChattingUserData}
-     * @param userId the id of the user sending the messages
+     *
+     * @param userId       the id of the user sending the messages
      * @param chattingToId the id of the user receiving the messages
      */
     public void getCurrentUserChatData(final String userId, final String chattingToId) {
@@ -667,8 +660,9 @@ public class FirebaseHelper {
 
     /**
      * Gets the chat data for the user who is being sent messages
+     *
      * @param chattingToId the id of the user receiving the messages
-     * @param userId the current users id
+     * @param userId       the current users id
      * @param userChatData the chat data returned from {@link #getCurrentUserChatData}
      */
     private void getChattingUserData(String chattingToId, String userId, final ArrayList<ChatObject> userChatData) {
@@ -703,6 +697,7 @@ public class FirebaseHelper {
      * Called when a new message is sent in the ChatActivity. This adds a field to the database that acts as a trigger to send a notification
      * A function is listening to changes on this field in the database, when the change happens a message is sent to the recipient users phone which triggers
      * a notification (see {@link MyFirebaseMessagingService}
+     *
      * @param messageFromUserId the id of the user sending the message
      */
     public static void newMessage(final String messageFromUserId) {
@@ -733,7 +728,8 @@ public class FirebaseHelper {
 
     /**
      * This is called from the userlist recyvler view when binding the viewholder, it is used to determine wether we should display a "new message" chat icon
-     * @param userID the id of the user to check
+     *
+     * @param userID     the id of the user to check
      * @param viewHolder the viewholder associated with this user
      */
     public void checkNewNotifications(final String userID, final RecyclerView.ViewHolder viewHolder) {
@@ -758,6 +754,7 @@ public class FirebaseHelper {
 
     /**
      * This is called when a user has opened the chat containing a 'new message', this removes the new message notification from the database
+     *
      * @param chattingToUserId the id of the user we are chatting to
      */
     public static void removeChatNotification(String chattingToUserId) {
@@ -768,7 +765,8 @@ public class FirebaseHelper {
 
     /**
      * This is called when we add a friend. Updates the database 'added users' field
-     * @param userId the current user id
+     *
+     * @param userId   the current user id
      * @param friendId the user Id of the friend being added
      */
     public static void addFriend(String userId, String friendId) {
@@ -796,16 +794,23 @@ public class FirebaseHelper {
 
     public interface firebaseDataCallback {
         void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v);
+
         void datadownloadedcallback(ArrayList<Object> arrayList);
+
         void workUsersDataCallback(ArrayList<Users> arrayList, Object returnObject);
+
         void finishedGettingPlace(AddedUsersAdapter.MyviewHolder myviewHolder, String s, String placeId);
+
         void isItLikedCallback(boolean response);
+
         void finishedGettingLikedRestaurants(ArrayList<String> places);
+
         void isPlaceSelected(boolean currentUserSelectedPlace, boolean otherUsersSelectedPlace);
     }
 
     public interface chatData {
         void gotChatData(ArrayList<ChatObject> messagesSent, ArrayList<ChatObject> messagesRecieved);
+
         void refreshData();
     }
 }

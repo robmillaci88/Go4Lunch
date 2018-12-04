@@ -9,7 +9,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +22,7 @@ import com.example.robmillaci.go4lunch.adapters.UsersListAdapter;
 import com.example.robmillaci.go4lunch.data_objects.Users;
 import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.example.robmillaci.go4lunch.utils.RecyclerViewMods;
+import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
 
@@ -31,6 +31,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 /**
  * This class is responsible for creating the list of users in the system
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class UserListFragment extends BaseFragment {
     private final String TAB_SHAREDPREF_KEY = "tabSelected";
     private final int ALL_WORKERS_TAB = 0;
@@ -45,6 +46,9 @@ public class UserListFragment extends BaseFragment {
     private ProgressBar mAllUsersProgress; //the progress bar to be displayed when searching for all users
     private ProgressBar mMyWorkersProgress; //the progress bar to be displayed when searching for added users
     private TabLayout mTabLayout; //The tab layout to switch between all users and added users
+
+    private ArrayList<Object> allusers; //to hold to users in the system
+    private ArrayList<Users> myFriends; //to hold friends
 
 
     @Override
@@ -161,11 +165,12 @@ public class UserListFragment extends BaseFragment {
         if (arrayList == null) {
             mFragmentView.setBackgroundResource(R.drawable.nousersfound); //if the returned results are null, display to the user that no users have been found
         } else {
+            allusers = arrayList;
             mFragmentView.setBackgroundResource(0);
             mAllUsersProgress.setVisibility(View.INVISIBLE);
             //noinspection unchecked
             mAdaptor = null;
-            mAdaptorAll = new UsersListAdapter(arrayList, getApplicationContext()); //create the adapter for all users
+            mAdaptorAll = new UsersListAdapter(allusers, getApplicationContext()); //create the adapter for all users
             RecyclerViewMods.setAnimation(mUsersList); //set the animation to the recycler view to enhance UX
             mUsersList.setAdapter(mAdaptorAll); //set the adapter
         }
@@ -187,7 +192,9 @@ public class UserListFragment extends BaseFragment {
             mFragmentView.setBackgroundResource(R.drawable.no_friends_found);
         } else {
             //noinspection ConstantConditions
-            mAdaptor = new AddedUsersAdapter(arrayList, this.getActivity().getWindow().getContext()); //create the adapter
+            myFriends = arrayList;
+            //noinspection ConstantConditions
+            mAdaptor = new AddedUsersAdapter(myFriends, this.getActivity().getWindow().getContext()); //create the adapter
             RecyclerViewMods.setAnimation(mUsersList); //set the animations
             mUsersList.setAdapter(mAdaptor); //set the adapter
             mFragmentView.setBackgroundResource(0);//remove the background
@@ -216,5 +223,13 @@ public class UserListFragment extends BaseFragment {
             tab.select();
         }
         super.onResume();
+    }
+
+    public ArrayList<Object> getAllusers() {
+        return allusers;
+    }
+
+    public ArrayList<Users> getMyFriends() {
+        return myFriends;
     }
 }

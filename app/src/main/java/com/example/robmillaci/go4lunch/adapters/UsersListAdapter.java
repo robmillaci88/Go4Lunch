@@ -20,7 +20,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.auth.User;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -56,10 +55,9 @@ public class UsersListAdapter extends BaseAdapterClass implements
     }
 
 
-
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
-         final MyviewHolder myviewHolder = (MyviewHolder) holder;
+        final MyviewHolder myviewHolder = (MyviewHolder) holder;
 
         final Users user = (Users) mUsersArrayList.get(position); //get the user related to this position
         final String name = user.getUsername(); //get the users name
@@ -81,7 +79,7 @@ public class UsersListAdapter extends BaseAdapterClass implements
         }
 
 
-         //get the current users addedUsers. The results are called back to this classes workUsersDataCallback method
+        //get the current users addedUsers. The results are called back to this classes workUsersDataCallback method
 
         //set the addFriend on click listener. First retrieve the list of currently added users and then pass this to the addFriend method in FireBaseHelper class
         //Updates the UI to reflect the adding of a user and displays a Toast message to confirm 'Friend added'
@@ -160,34 +158,34 @@ public class UsersListAdapter extends BaseAdapterClass implements
 
 
     /**
-     * called after {@link FirebaseHelper#createUserObjects(ArrayList,Object)}
+     * called after {@link FirebaseHelper#createUserObjects(ArrayList, Object)}
      * If the viewholders current user's ID is within the returned users Array, this user has been added and so we make UI changes to reflect this
      *
-     * @param addedUsersReturned      the current users added users (friends)
-     * @param viewHolder              the returned Viewholder object that we need to make UI changes to depending on the reults of @param addedUsersReturned
+     * @param addedUsersReturned the current users added users (friends)
+     * @param viewHolder         the returned Viewholder object that we need to make UI changes to depending on the reults of @param addedUsersReturned
      */
     @Override
     public void workUsersDataCallback(ArrayList<Users> addedUsersReturned, Object viewHolder) {
-      MyviewHolder myviewHolder = (MyviewHolder)viewHolder;
-      String viewHolderId = myviewHolder.uniqueId;
-        Log.d("workUsersDataCallback", "workUsersDataCallback: viewholder id is " + viewHolderId);
-      for (Users u : addedUsersReturned){
-     //     Log.d("workUsersDataCallback", "workUsersDataCallback: checking user " + u.getUsername() + " " + u.getUserID());
-          if (u.getUserID().equals(viewHolderId)){
-              myviewHolder.addFriend.setImageResource(R.drawable.checked);
-              myviewHolder.addFriend.setClickable(false);
-          }
-      }
+        MyviewHolder myviewHolder = (MyviewHolder) viewHolder;
+        String viewHolderId = myviewHolder.uniqueId;
+
+        for (Users u : addedUsersReturned) {
+            //     Log.d("workUsersDataCallback", "workUsersDataCallback: checking user " + u.getUsername() + " " + u.getUserID());
+            if (u.getUserID().equals(viewHolderId)) {
+                myviewHolder.addFriend.setImageResource(R.drawable.checked);
+                myviewHolder.addFriend.setClickable(false);
+            }
+        }
     }
 
 
     public static class MyviewHolder extends RecyclerView.ViewHolder {
 
-       public final TextView username;
-        public final TextView userEmail;
-        public final ImageView userPicture;
+        final TextView username;
+        final TextView userEmail;
+        final ImageView userPicture;
         public final ImageView addFriend;
-        public String uniqueId;
+        String uniqueId;
 
         private MyviewHolder(View itemView) {
             super(itemView);

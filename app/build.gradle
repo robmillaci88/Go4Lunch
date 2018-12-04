@@ -69,8 +69,18 @@ dependencies {
 
     //html parser
     implementation 'org.jsoup:jsoup:1.11.3'
-    androidTestImplementation 'com.android.support.test:rules:1.0.2'
 
+    androidTestImplementation "com.android.support.test:runner:1.0.2"
+    androidTestImplementation "com.android.support.test:rules:1.0.2"
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-intents:3.0.2'
+    androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
+
+    androidTestImplementation('com.android.support.test.espresso:espresso-contrib:2.0') {
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude module: 'recyclerview-v7'
+    }
 
 }
 apply plugin: 'com.google.gms.google-services'

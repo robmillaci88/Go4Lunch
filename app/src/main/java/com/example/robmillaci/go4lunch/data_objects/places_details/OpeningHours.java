@@ -25,5 +25,7 @@ public class OpeningHours {
         return weekdayText;
     }
 
-
+    public void setOpenNow(Boolean openNow) {
+        this.openNow = openNow;
+    }
 }

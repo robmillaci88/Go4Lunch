@@ -247,7 +247,6 @@ public class StartActivity extends AppCompatActivity {
             loggedInPic = mAuth.getCurrentUser().getPhotoUrl().toString();
             loggedinUserId = mAuth.getCurrentUser().getUid();
 
-
             startActivity(launchMain);
         }
     }

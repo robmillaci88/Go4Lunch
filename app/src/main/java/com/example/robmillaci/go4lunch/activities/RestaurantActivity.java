@@ -10,7 +10,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -32,7 +31,6 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
@@ -99,28 +97,13 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
         selectedFab = findViewById(R.id.restaurant_selected); //The tab to selected this restaurant as the 'eating at' place
         starLikeTab = tabs.getTabAt(1); //The tab to 'like' this place
 
-        Bundle data = getIntent().getExtras();
 
+        Bundle data = getIntent().getExtras();
         if (data != null) {
             mPojoPlace = (PojoPlace) data.getSerializable(PLACE_SERIALIZABLE_KEY); //Restore the place passed to this activity in the calling intent
         }
-
         if (mPojoPlace != null) {
             mMarker = GoogleMapsFragment.getSpecificMarker(mPojoPlace.getName()); //Retrieve the specific marker for this place
-
-            // if the marker is null, create a new marker for this place
-            if (mMarker == null) {
-                MarkerOptions mOptions = new MarkerOptions()
-                        .position(mPojoPlace.getLocation())
-                        .title(mPojoPlace.getName())
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
-
-                Marker marker = GoogleMapsFragment.getmGoogleMap().addMarker(mOptions);
-
-                GoogleMapsFragment.getAllMarkers().put(mOptions.getTitle(), marker);
-                marker.setTag(MARKER_UNSELECTED);
-                mMarker = marker;
-            }
 
             // Set the name, rating, web url, placeId, phonenumber and location
             name.setText(mPojoPlace.getName());
@@ -145,11 +128,12 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
                     Update the database with the new selected place by calling firebasehelper.getSelectedPlace()
                      */
                     selectedFab.setImageResource(R.drawable.checked);
+
                     mMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_green));
                     mMarker.setTag(MARKER_SELECTED);
                     isItSelected = true;
 
-                    GoogleMapsFragment.setEatingAtPlace(mPojoPlace);
+                    GoogleMapsFragment.setEatingAtPlace(mPojoPlace, getApplicationContext()); //set this as the place the user is eating
 
                     Alarm.scheduleAlarm(RestaurantActivity.this, mPojoPlace.getName(), placeImage, mPojoPlace.getAddress(), usersEatingHere);
 
@@ -169,7 +153,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
 
                     firebaseHelper.getUsersEatingHere(mPojoPlace.getId(), null); //now we have unselected this place, refresh the list of users 'eating here'
 
-                    GoogleMapsFragment.setEatingAtPlace(null); //removed the cached eating place
+                    GoogleMapsFragment.setEatingAtPlace(null, getApplicationContext()); //removed the cached eating place
 
                     if (!isItSelectedByOthers) { //we only want to change the markers tag and icon is no other friends have selected this place
                         mMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_orange));
@@ -179,6 +163,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
                 }
             }
         });
+
 
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -230,14 +215,17 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
      */
     private void getAdditionalPlaceData() {
 
-        firebaseHelper.isItLiked(placeID);
+        firebaseHelper.isItLiked(placeID); //check if the place ID is liked by us or any of our friends
 
-        photoDownloader.getPhotos(placeID, Places.getGeoDataClient(this));
+        photoDownloader.getPhotos(placeID, Places.getGeoDataClient(this)); //get the photo of this place
 
-        eaterprogressbar.setVisibility(View.VISIBLE);
+        firebaseHelper.getUsersEatingHere(placeID, null); //get the list of other users eating here
+
+        eaterprogressbar.setVisibility(View.VISIBLE); //show the progress bar for finding users eating here
         eaterprogressbar.setProgress(1);
 
-        /**
+
+        /*
          * the place type needs to be retrieved from {@link com.example.robmillaci.go4lunch.web_service.FourSquareAPI#getPlaceType(String, String)}
          * Therefore we need a slight delay before updating the UI
          */
@@ -253,10 +241,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
                 });
 
             }
-        },1000);
-
-
-        firebaseHelper.getUsersEatingHere(placeID, null);
+        }, 1000);
     }
 
 
@@ -362,18 +347,15 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
      */
     @Override
     public void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v) {
-        Log.d("EATERS", "finishGettingUsersEatingHere: finished getting users eating here");
-        for (Users u : users){
-            Log.d("EATERS", "finishGettingUsersEatingHere: user is " + u.getUsername());
-        }
         usersEatingHere = new String[users.size()];
 
-        for (int i = 0; i < users.size(); i++) {
+        for (int i = 0; i < users.size(); i++) { //loop through the retrieved users arraylist and create a String array containing the users names
             usersEatingHere[i] = users.get(i).getUsername();
         }
 
-        eaterprogressbar.setVisibility(View.GONE);
+        eaterprogressbar.setVisibility(View.GONE); //hide the progress bar
 
+        //start the restaurant detail activity which will display the users
         RestaurantActivityAdapter mAdaptor = new RestaurantActivityAdapter(users, this);
         peopleEatingRecyclerView.setLayoutManager(new LinearLayoutManager(RestaurantActivity.this));
         peopleEatingRecyclerView.setAdapter(mAdaptor);
@@ -449,7 +431,6 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
         }
         isItSelectedByOthers = otherUsersSelectedPlace;
     }
-
 
 
 }

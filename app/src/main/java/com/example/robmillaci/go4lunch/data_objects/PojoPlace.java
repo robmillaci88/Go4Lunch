@@ -1,9 +1,6 @@
 package com.example.robmillaci.go4lunch.data_objects;
 
-import android.util.Log;
-
-import com.example.robmillaci.go4lunch.activities.CallersEnum;
-import com.example.robmillaci.go4lunch.data_objects.FourSquareDataObjects.Category;
+import com.example.robmillaci.go4lunch.data_objects.four_square_data_objects.Category;
 import com.example.robmillaci.go4lunch.web_service.FourSquareAPI;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBufferResponse;
@@ -32,10 +29,8 @@ public class PojoPlace implements Serializable, FourSquareAPI.FourSquareCallback
     private final double latitude;
     private final double longitude;
     private String placeType;
-    private boolean placeParsed = false;
 
-
-    public PojoPlace(Place googlePlace, PlaceBufferResponse placeBufferResponse, Enum<CallersEnum> calledFrom) {
+    public PojoPlace(Place googlePlace, PlaceBufferResponse placeBufferResponse) {
         this.name = googlePlace.getName() == null ? NO_VALUE_FOUND : googlePlace.getName().toString();
         this.address = googlePlace.getAddress() == null ? NO_VALUE_FOUND : googlePlace.getAddress().toString();
         this.website = googlePlace.getWebsiteUri() == null ? NO_VALUE_FOUND : googlePlace.getWebsiteUri().toString();
@@ -54,12 +49,10 @@ public class PojoPlace implements Serializable, FourSquareAPI.FourSquareCallback
     }
 
     private void getAdditionalData() {
-        Log.d("FOURCHECK", "getAdditionalData: called");
-        StringBuilder latlng = new StringBuilder();
-        latlng.append(String.valueOf(this.latitude));
-        latlng.append(",");
-        latlng.append(String.valueOf(this.longitude));
-        new FourSquareAPI(this).getPlaceType(latlng.toString(),this.name.toLowerCase());
+        String latlng = String.valueOf(this.latitude) +
+                "," +
+                String.valueOf(this.longitude);
+        new FourSquareAPI(this).getPlaceType(latlng, this.name.toLowerCase());
     }
 
 
@@ -95,23 +88,11 @@ public class PojoPlace implements Serializable, FourSquareAPI.FourSquareCallback
         return rating;
     }
 
-    public void setPlaceType(String placeType) {
-        this.placeType = placeType;
-    }
-
-    public void setPlaceParsed(boolean placeParsed) {
-        this.placeParsed = placeParsed;
-    }
-
-    public boolean isPlaceParsed() {
-        return placeParsed;
-    }
-
     @Override
     public void gotCategories(List<Category> categories) {
-        for (Category s : categories){
-            Log.d("FOURCHECK", "gotCategories: set place type to " + s.getName());
+        for (Category s : categories) {
             this.placeType = s.getName();
         }
     }
+
 }

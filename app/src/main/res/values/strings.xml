@@ -87,7 +87,7 @@
     <string name="delete_confirmation">Are you sure you want to delete this friend?</string>
     <string name="cancel">Cancel</string>
     <string name="error_getting_reviews">Error getting pojoPlace reviews</string>
-    <string name="no_reviews_found">No pojoPlace reviews found</string>
+    <string name="no_reviews_found">No place reviews found</string>
     <string name="friend_added">Friend added!</string>
     <string name="no_places_found">Could not find any local places to eat!</string>
     <string name="google_services_error">Google Services is not installed, up-to-date, or enabled</string>
@@ -97,4 +97,6 @@
     <string name="retry">retry</string>
     <string name="your_lunch_at">Your lunch is at\u0020</string>
     <string name="error_getting_details">Error getting some place details, please check your network</string>
+    <string name="no_place_selected_yet">You haven\'t chosen a place to eat yet!</string>
+    <string name="marker_already_added">This marker has already been added to the map</string>
 </resources>

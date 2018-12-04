@@ -31,6 +31,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Firebase
         }
     }
 
+    //on Pause unregister the network state reciever
     @Override
     protected void onPause() {
         try {

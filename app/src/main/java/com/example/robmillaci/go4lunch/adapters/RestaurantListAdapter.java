@@ -316,7 +316,7 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
     }
 
 
-    static class MyviewHolder extends RecyclerView.ViewHolder {
+    public static class MyviewHolder extends RecyclerView.ViewHolder {
         final ImageView placeImage;
         final TextView rest_title;
         final TextView vicinity;
@@ -345,6 +345,9 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
             this.numberOfEaters = itemView.findViewById(R.id.usersEatingHere);
         }
 
+        public TextView getNumberOfEaters() {
+            return numberOfEaters;
+        }
     }
 
     /**

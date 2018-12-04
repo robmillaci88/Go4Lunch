@@ -32,7 +32,6 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.robmillaci.go4lunch.activities.CallersEnum.USER_LIST_FRAGMENT;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
@@ -251,7 +250,7 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
                                     Intent restaurantDetailPage = new Intent(getApplicationContext(), RestaurantActivity.class);
 
                                     restaurantDetailPage.putExtra(PojoPlace.PLACE_SERIALIZABLE_KEY,
-                                            new PojoPlace(foundPlace, response, USER_LIST_FRAGMENT));
+                                            new PojoPlace(foundPlace, response));
 
                                     getApplicationContext().startActivity(restaurantDetailPage);
                                 }

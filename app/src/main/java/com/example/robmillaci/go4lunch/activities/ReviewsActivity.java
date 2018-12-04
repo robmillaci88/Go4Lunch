@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -36,13 +35,15 @@ public class ReviewsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reviews);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true); //adds the home button to the action bar to navigate back from this activity
         }
 
-
+        /*
+          Creates an intent filter that sends a broadcast to {@link MainActivity#mNetworkStateReceiver} when a change in network takes place
+          This will check if we have internet connection or not see {@link com.example.robmillaci.go4lunch.alarms_and_receivers.NetworkStateReceiver}
+         */
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         registerReceiver(MainActivity.mNetworkStateReceiver, filter);
@@ -56,7 +57,7 @@ public class ReviewsActivity extends AppCompatActivity {
         setTitle(getString(R.string.reviews_for) + " " + placeName); //sets the activities title
 
         if (placeId != null) {
-            getReviews(placeId);
+            getReviews(placeId); //get the reviews for this place
         } else {
             Toast.makeText(this, R.string.error_getting_reviews, Toast.LENGTH_LONG).show();
             finish();
