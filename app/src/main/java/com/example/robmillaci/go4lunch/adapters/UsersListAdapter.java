@@ -3,7 +3,6 @@ package com.example.robmillaci.go4lunch.adapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -166,14 +165,17 @@ public class UsersListAdapter extends BaseAdapterClass implements
      */
     @Override
     public void workUsersDataCallback(ArrayList<Users> addedUsersReturned, Object viewHolder) {
-        MyviewHolder myviewHolder = (MyviewHolder) viewHolder;
-        String viewHolderId = myviewHolder.uniqueId;
+        if (viewHolder != null) {
+            MyviewHolder myviewHolder = (MyviewHolder) viewHolder;
 
-        for (Users u : addedUsersReturned) {
-            //     Log.d("workUsersDataCallback", "workUsersDataCallback: checking user " + u.getUsername() + " " + u.getUserID());
-            if (u.getUserID().equals(viewHolderId)) {
-                myviewHolder.addFriend.setImageResource(R.drawable.checked);
-                myviewHolder.addFriend.setClickable(false);
+            String viewHolderId = myviewHolder.uniqueId;
+
+            for (Users u : addedUsersReturned) {
+                //     Log.d("workUsersDataCallback", "workUsersDataCallback: checking user " + u.getUsername() + " " + u.getUserID());
+                if (u.getUserID().equals(viewHolderId)) {
+                    myviewHolder.addFriend.setImageResource(R.drawable.checked);
+                    myviewHolder.addFriend.setClickable(false);
+                }
             }
         }
     }

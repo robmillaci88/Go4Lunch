@@ -2,7 +2,6 @@ package com.example.robmillaci.go4lunch.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
@@ -517,19 +516,20 @@ public class FirebaseHelper {
                 if (task.isSuccessful()) {
                     final QuerySnapshot taskResults = task.getResult();
                     List<DocumentSnapshot> documents = taskResults.getDocuments();
-                    String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(","); //split the returned users CSV string into a String[]
-                    //noinspection unchecked
+                    //todo handle added users does not equal null
+                    if (documents.get(0).get(DATABASE_ADDED_USERS_FIELD) != null){
+                        String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(","); //split the returned users CSV string into a String[]
+                        //noinspection unchecked
 
-                    usersHashSet.addAll(Arrays.asList(addedUsers)); //to 100% ensure no duplicates
-                    final ArrayList<String> addedUsersArray = new ArrayList<>(usersHashSet); //create an arraylist of added user id's to loop through each one
+                        usersHashSet.addAll(Arrays.asList(addedUsers)); //to 100% ensure no duplicates
+                        final ArrayList<String> addedUsersArray = new ArrayList<>(usersHashSet); //create an arraylist of added user id's to loop through each one
 
-                    final int[] count = new int[1];
-                    count[0] = addedUsers.length; //enables counting down to 0 so we know when we have looped through each user and can callback
+                        final int[] count = new int[1];
+                        count[0] = addedUsers.length; //enables counting down to 0 so we know when we have looped through each user and can callback
 
                     //Now we have the list of added friends, loop through each one and see if they have selected the specific place
                     if (addedUsers.length > 0) {
                         for (String s : addedUsersArray) {
-
                             FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH)
                                     .document(s)
                                     .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() { //get the friends document
@@ -572,6 +572,9 @@ public class FirebaseHelper {
                         }
                     } else {
                         mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
+                    }
+                    } else {
+                        getUsersEatingHereError(friendsEatingHere, v);
                     }
                 } else { //if the task isnt successful, callback with an Array of size 0
                     getUsersEatingHereError(friendsEatingHere, v);

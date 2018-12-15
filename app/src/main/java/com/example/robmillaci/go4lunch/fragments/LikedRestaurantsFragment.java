@@ -124,7 +124,10 @@ public class LikedRestaurantsFragment extends BaseFragment implements IgooglePla
             noLikedRestaurants.setVisibility(View.GONE);
             setRecyclerView(pojoPlaces, placesBuffer);
         }
-        placesBuffer.close();
+
+        if(placesBuffer != null && !placesBuffer.isClosed()) {
+            placesBuffer.close();
+        }
     }
 
     private void setRecyclerView(ArrayList<PojoPlace> places, PlaceBufferResponse placeBufferResponse) {

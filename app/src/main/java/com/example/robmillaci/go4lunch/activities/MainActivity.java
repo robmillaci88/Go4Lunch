@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -100,7 +101,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             navigationView.setNavigationItemSelectedListener(this);
             navigationView.setItemIconTintList(null);
 
-            TextView navName = navigationView.getHeaderView(0).findViewById(R.id.navbarName);
+            EditText navName = navigationView.getHeaderView(0).findViewById(R.id.navbarName);
             TextView navEmail = navigationView.getHeaderView(0).findViewById(R.id.navbarEmail);
             ImageView navPic = navigationView.getHeaderView(0).findViewById(R.id.profPic);
 
