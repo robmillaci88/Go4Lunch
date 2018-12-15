@@ -29,17 +29,23 @@ public class FourSquareAPI {
     }
 
     public void getPlaceType(String placeLatLng, final String placeNameLowerCase) {
+
         GetDataService service = ServiceGenerator.getFourSquareRetrofitInstance().create(GetDataService.class);
         retrofit2.Call<RawData> call = service.get4squareDetail(placeLatLng, CLIENTID, CLIENTSECRET, VERSION_DATE);
+
         call.enqueue(new Callback<com.example.robmillaci.go4lunch.data_objects.four_square_data_objects.RawData>() {
             @Override
             public void onResponse(@NonNull Call<RawData> call, @NonNull retrofit2.Response<RawData> response) {
                 final RawData responseData = response.body();
                 if (responseData != null) {
                     for (Venue v : responseData.getResponse().getVenues()) {
-                        if (v.getName().toLowerCase().contains(placeNameLowerCase) || placeNameLowerCase.contains(v.getName().toLowerCase())
-                                || v.getName().toLowerCase().replaceAll(" ", "").equals(placeNameLowerCase.toLowerCase().replaceAll(" ", ""))) {
+                        if (v.getName().toLowerCase().contains(placeNameLowerCase)
+                                || placeNameLowerCase.contains(v.getName().toLowerCase())
+                                || v.getName().toLowerCase().replaceAll(" ", "").contains(placeNameLowerCase.toLowerCase().replaceAll(" ", ""))
+                                || placeNameLowerCase.replaceAll(" ", "").contains(v.getName().toLowerCase().replaceAll(" ", ""))) {
+
                             mFourSquareCallback.gotCategories(v.getCategories());
+                            break;
                         }
                     }
                 }

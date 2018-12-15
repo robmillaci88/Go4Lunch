@@ -398,9 +398,14 @@ public class GoogleMapsFragment extends BaseFragment implements
     @Override
     public void workUsersDataCallback(ArrayList<Users> userList, Object o) {
         //As the current user is filtered out from the firebase helper methods, we need to add the current user in here to see our selected place
-        userList.add(new Users(StartActivity.loggedInUser, StartActivity.loggedinUserId,
+        ArrayList<Users> usersArrayList = userList;
+        if(usersArrayList == null){
+            usersArrayList = new ArrayList<>();
+        }
+
+        usersArrayList.add(new Users(StartActivity.loggedInUser, StartActivity.loggedinUserId,
                 StartActivity.loggedInEmail, StartActivity.loggedInPic));
-        for (Users u : userList) {
+        for (Users u : usersArrayList) {
             if (!("").equals(u.getUserID()) && !u.getUserID().equals(StartActivity.loggedinUserId)) { //we want to separate the logged in users selected place
                 firebaseHelper.getSelectedPlace(u.getUserID(), null);
             }
@@ -480,27 +485,14 @@ public class GoogleMapsFragment extends BaseFragment implements
 
         allMarkers.put(marker.getTitle(), marker);
 
+        PojoPlace pojoPlace = new PojoPlace(place, null);
+
+        mPlaces.put(pojoPlace.getName(), pojoPlace);
+        originalPlaces.put(pojoPlace.getName(), pojoPlace);
+
+        refreshMarkers(); //now we have added the new place, refresh the markers
+
         findPlacesResponse(false); //No error so we can respond by just hiding the UI components displayed while searching. Also animates the camera
-
-        //creating the POJO places required HTML parsing which can slow down the main UI execution causing UX problems.
-        //Handle the creation on a background thread to fix this issue and smooth out UX.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                PojoPlace pojoPlace = new PojoPlace(place, null);
-
-                mPlaces.put(pojoPlace.getName(), pojoPlace);
-                originalPlaces.put(pojoPlace.getName(), pojoPlace);
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshMarkers(); //now we have added the new place, refresh the markers
-                    }
-                });
-            }
-        }).start();
-
     }
 
 

@@ -1,5 +1,7 @@
 package com.example.robmillaci.go4lunch.data_objects;
 
+import android.util.Log;
+
 import com.example.robmillaci.go4lunch.data_objects.four_square_data_objects.Category;
 import com.example.robmillaci.go4lunch.web_service.FourSquareAPI;
 import com.google.android.gms.location.places.Place;
@@ -90,6 +92,7 @@ public class PojoPlace implements Serializable, FourSquareAPI.FourSquareCallback
 
     @Override
     public void gotCategories(List<Category> categories) {
+        Log.d("gotCategories", "gotCategories: got response");
         for (Category s : categories) {
             this.placeType = s.getName();
         }

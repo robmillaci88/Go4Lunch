@@ -90,13 +90,13 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
         eaterprogressbar = findViewById(R.id.eaterprogressbar);
         ImageView backbtn = findViewById(R.id.backbtn);
         TextView name = findViewById(R.id.restaurant_name); //The place name
+        TextView address = findViewById(R.id.restaurant_address);//the place address
 
         image = findViewById(R.id.restaurant_image); //The place image
         RatingBar rating = findViewById(R.id.ratingBar); //The place rating bar
         TabLayout tabs = findViewById(R.id.action_tabs); //The tabs for this activity
         selectedFab = findViewById(R.id.restaurant_selected); //The tab to selected this restaurant as the 'eating at' place
         starLikeTab = tabs.getTabAt(1); //The tab to 'like' this place
-
 
         Bundle data = getIntent().getExtras();
         if (data != null) {
@@ -112,6 +112,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
             placeID = mPojoPlace.getId();
             phoneNumber = mPojoPlace.getPhoneNumber();
             location = mPojoPlace.getLocation();
+            address.setText(String.format("%s - %s", mPojoPlace.getPlaceType(), mPojoPlace.getAddress()));
         }
 
         getAdditionalPlaceData(); //see method comments
@@ -235,8 +236,8 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        TextView address = findViewById(R.id.restaurant_address);//the place address
-                        address.setText(String.format("%s - %s", mPojoPlace.getPlaceType(), mPojoPlace.getAddress()));
+
+
                     }
                 });
 

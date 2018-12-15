@@ -13,7 +13,7 @@
 
         <ImageView
             android:id="@+id/imageView3"
-            android:layout_width="0dp"
+            android:layout_width="544dp"
             android:layout_height="181dp"
             android:alpha="0.6"
             android:contentDescription="@string/nav_header_desc"
