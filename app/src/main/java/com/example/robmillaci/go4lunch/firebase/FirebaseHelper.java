@@ -145,7 +145,9 @@ public class FirebaseHelper {
         } else {
             usersObjects = new ArrayList<>();
             count = addedUsersArray.size(); //count to determine when we have looped through each user. Minus 1 because we are not including the logged in user
+
             for (String s : addedUsersArray) { //for each user ID in the addedUsersArray, loop through and extract their relevant information to create Users objects
+                count--;
                 Query docRef = FirebaseHelper.getQueryDocSnapshot(s);
                 docRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @SuppressWarnings("ConstantConditions")
@@ -164,18 +166,19 @@ public class FirebaseHelper {
                                 email = (String) d.get(DATABASE_EMAIL_FIELD);
                                 id = (String) d.get(DATABASE_UNIQUE_ID_FIELD);
                                 picture = (String) d.get(DATABASE_PICTURE_FIELD);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            if (!userName.equals("") && !email.equals("") && !id.equals("")) {
-                                Users user = new Users(userName, id, email, picture);
-                                usersObjects.add(user);
-                                count--;
 
+                                if (!userName.equals("") && !email.equals("") && !id.equals("")) {
+                                    Users user = new Users(userName, id, email, picture);
+                                    usersObjects.add(user);
+                                }
                                 if (count == 0) { //if the count is 0, we have looped through every user ID so we can now callback with the resulting user objects
-                                    Log.d("getMyWorkUsers", "onComplete: got to first");
                                     mFirebaseDataCallback.workUsersDataCallback(usersObjects, returnObject);
                                 }
+                            } catch (Exception e) {
+                                if (count == 0) { //if the count is 0, we have looped through every user ID so we can now callback with the resulting user objects
+                                    mFirebaseDataCallback.workUsersDataCallback(usersObjects, returnObject);
+                                }
+                                e.printStackTrace();
                             }
                         }
                     }
@@ -515,7 +518,7 @@ public class FirebaseHelper {
                     final QuerySnapshot taskResults = task.getResult();
                     List<DocumentSnapshot> documents = taskResults.getDocuments();
                     //todo handle added users does not equal null
-                    if (documents.get(0).get(DATABASE_ADDED_USERS_FIELD) != null){
+                    if (documents.get(0).get(DATABASE_ADDED_USERS_FIELD) != null) {
                         String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(","); //split the returned users CSV string into a String[]
                         //noinspection unchecked
 
@@ -525,52 +528,52 @@ public class FirebaseHelper {
                         final int[] count = new int[1];
                         count[0] = addedUsers.length; //enables counting down to 0 so we know when we have looped through each user and can callback
 
-                    //Now we have the list of added friends, loop through each one and see if they have selected the specific place
-                    if (addedUsers.length > 0) {
-                        for (String s : addedUsersArray) {
-                            FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH)
-                                    .document(s)
-                                    .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() { //get the friends document
+                        //Now we have the list of added friends, loop through each one and see if they have selected the specific place
+                        if (addedUsers.length > 0) {
+                            for (String s : addedUsersArray) {
+                                FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH)
+                                        .document(s)
+                                        .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() { //get the friends document
 
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                    count[0]--;//reduce the count so we know when we have checked every user
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                        count[0]--;//reduce the count so we know when we have checked every user
 
-                                    if (task.isSuccessful() && task != null) {
+                                        if (task.isSuccessful() && task != null) {
 
-                                        DocumentSnapshot taskResults = task.getResult();
-                                        try {
-                                            if (taskResults != null) {
+                                            DocumentSnapshot taskResults = task.getResult();
+                                            try {
+                                                if (taskResults != null) {
 
-                                                String selectedPlaceId =
-                                                        taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString(); //extract the friends selected place id
+                                                    String selectedPlaceId =
+                                                            taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString(); //extract the friends selected place id
 
-                                                if (selectedPlaceId.equals(placeId)) { //if the friends selected place is equal to the place we are checking against, add to the arraylist
-                                                    String id = taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString(); //extract the friends ID
-                                                    String name = taskResults.get(DATABASE_NAME_FIELD).toString(); //extract the friends name
-                                                    String email = taskResults.get(DATABASE_EMAIL_FIELD).toString(); //extract the friends email
-                                                    String picture = taskResults.get(DATABASE_PICTURE_FIELD).toString(); //extract the friends picture
+                                                    if (selectedPlaceId.equals(placeId)) { //if the friends selected place is equal to the place we are checking against, add to the arraylist
+                                                        String id = taskResults.get(DATABASE_SELECTED_RESTAURANT_ID_FIELD).toString(); //extract the friends ID
+                                                        String name = taskResults.get(DATABASE_NAME_FIELD).toString(); //extract the friends name
+                                                        String email = taskResults.get(DATABASE_EMAIL_FIELD).toString(); //extract the friends email
+                                                        String picture = taskResults.get(DATABASE_PICTURE_FIELD).toString(); //extract the friends picture
 
-                                                    friendsEatingHere.add(new Users(name, id, email, picture)); //add the user object to an arraylist for returning
+                                                        friendsEatingHere.add(new Users(name, id, email, picture)); //add the user object to an arraylist for returning
+                                                    }
+
+                                                    if (count[0] == 0) { //if we have looped through every friend, callback the results
+                                                        mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
+                                                    }
                                                 }
-
+                                            } catch (Exception e) {
                                                 if (count[0] == 0) { //if we have looped through every friend, callback the results
                                                     mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
                                                 }
+                                                e.printStackTrace();
                                             }
-                                        } catch (Exception e) {
-                                            if (count[0] == 0) { //if we have looped through every friend, callback the results
-                                                mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
-                                            }
-                                            e.printStackTrace();
                                         }
                                     }
-                                }
-                            });
+                                });
+                            }
+                        } else {
+                            mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
                         }
-                    } else {
-                        mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
-                    }
                     } else {
                         getUsersEatingHereError(friendsEatingHere, v);
                     }
@@ -587,7 +590,8 @@ public class FirebaseHelper {
      * called when an error is experience in {@link #getUsersEatingHere}
      * this ensures that the callback functionality is still run even if we experience and error getting the users
      */
-    private void getUsersEatingHereError(ArrayList<Users> friendsEatingHere, RecyclerView.ViewHolder v) {
+    private void getUsersEatingHereError
+    (ArrayList<Users> friendsEatingHere, RecyclerView.ViewHolder v) {
         mFirebaseDataCallback.finishGettingUsersEatingHere(friendsEatingHere, v);
     }
 
@@ -666,7 +670,8 @@ public class FirebaseHelper {
      * @param userId       the current users id
      * @param userChatData the chat data returned from {@link #getCurrentUserChatData}
      */
-    private void getChattingUserData(String chattingToId, String userId, final ArrayList<ChatObject> userChatData) {
+    private void getChattingUserData(String chattingToId, String userId,
+                                     final ArrayList<ChatObject> userChatData) {
         FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(chattingToId).collection(DATABASE_CHAT_COLLECTION)
                 .document(userId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -733,7 +738,8 @@ public class FirebaseHelper {
      * @param userID     the id of the user to check
      * @param viewHolder the viewholder associated with this user
      */
-    public void checkNewNotifications(final String userID, final RecyclerView.ViewHolder viewHolder) {
+    public void checkNewNotifications(final String userID,
+                                      final RecyclerView.ViewHolder viewHolder) {
         if (!userID.equals(mCurrentUserId)) {
             FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId).collection(DATABASE_CHAT_NOTIFICATIONS)
                     .document(userID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {

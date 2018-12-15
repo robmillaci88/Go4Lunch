@@ -311,11 +311,15 @@ public class GoogleMapsFragment extends BaseFragment implements
         if (error) {
             Toast.makeText(getApplicationContext(), R.string.no_places_found, Toast.LENGTH_LONG).show();
         }
-        cameraPosition = new CameraPosition.Builder().target(currentlocationLatLon).zoom(DEFAULT_ZOOM).build();
-        mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        searchingImg.setVisibility(View.GONE);
-        searchingProgressBar.setVisibility(View.GONE);
-        searchingText.setVisibility(View.GONE);
+        try {
+            cameraPosition = new CameraPosition.Builder().target(currentlocationLatLon).zoom(DEFAULT_ZOOM).build();
+            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            searchingImg.setVisibility(View.GONE);
+            searchingProgressBar.setVisibility(View.GONE);
+            searchingText.setVisibility(View.GONE);
+        }catch(Exception e){
+            Toast.makeText(getApplicationContext(),"Could not find your location",Toast.LENGTH_LONG).show();
+        }
     }
 
 
