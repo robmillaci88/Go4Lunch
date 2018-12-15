@@ -2,6 +2,7 @@ package com.example.robmillaci.go4lunch.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
@@ -114,7 +115,7 @@ public class FirebaseHelper {
                         QuerySnapshot taskResults = task.getResult();
                         List<DocumentSnapshot> documents = taskResults.getDocuments();
                         String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(","); //split the returned "added users" string
-
+                        Log.d("getMyWorkUsers", "onComplete: returned users added are " + Arrays.toString(addedUsers));
                         hashSet.addAll(Arrays.asList(addedUsers)); //ensure not duplicates
                         //add the results to an array list for return
                         ArrayList<String> addedUsersArray = new ArrayList<>(hashSet);
@@ -172,12 +173,9 @@ public class FirebaseHelper {
                                 count--;
 
                                 if (count == 0) { //if the count is 0, we have looped through every user ID so we can now callback with the resulting user objects
-
+                                    Log.d("getMyWorkUsers", "onComplete: got to first");
                                     mFirebaseDataCallback.workUsersDataCallback(usersObjects, returnObject);
                                 }
-                            } else {
-
-                                mFirebaseDataCallback.workUsersDataCallback(null, null);
                             }
                         }
                     }
