@@ -118,6 +118,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onNewToken(String s) {
+        Log.d("MyFirebaseMessaging", "onNewToken: called");
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Map<String, Object> data = new HashMap<>();
         if (currentUser != null) {

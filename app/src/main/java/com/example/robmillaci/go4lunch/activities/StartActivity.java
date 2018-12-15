@@ -35,6 +35,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.auth.User;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
@@ -43,6 +44,7 @@ import java.util.Map;
 
 import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_SELECTED_RESTAURANT_FIELD;
 import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_SELECTED_RESTAURANT_ID_FIELD;
+import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_TOKEN_PATH;
 
 /**
  * This class created the first activity presented to a new user<br>
@@ -189,6 +191,7 @@ public class StartActivity extends AppCompatActivity {
                                 } else {
                                     //The user is not a new user, dont re-add to the database but display a welcome back message
                                     Toast.makeText(StartActivity.this, getString(R.string.welcome_back) + user.getDisplayName(), Toast.LENGTH_LONG).show();
+                                    updateNewToken(user);
                                 }
                                 updateUI(user);
                             } else {
@@ -200,6 +203,23 @@ public class StartActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void updateNewToken(final FirebaseUser user) {
+        final FirebaseFirestore mFirebaseDatabase;
+        mFirebaseDatabase = FirebaseFirestore.getInstance();
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if (task.isSuccessful()) {
+                    @SuppressWarnings("ConstantConditions") String idToken = task.getResult().getToken();
+                    Map<String, Object> data = new HashMap<>();
+                    data.put(FirebaseHelper.DATABASE_TOKEN_PATH, idToken);
+                    mFirebaseDatabase.collection(FirebaseHelper.DATABASE_COLLECTION_PATH).document(user.getUid()).update(data);
+                    addUserTestData(data, mFirebaseDatabase);
+                }
+            }
+        });
     }
 
 
@@ -222,6 +242,7 @@ public class StartActivity extends AppCompatActivity {
                                     addUserToDB(user);
                                 } else {
                                     Toast.makeText(StartActivity.this, getString(R.string.welcome_back) + user.getDisplayName(), Toast.LENGTH_LONG).show();
+                                    updateNewToken(user);
                                 }
                                 updateUI(user);
                             } else {
@@ -279,19 +300,8 @@ public class StartActivity extends AppCompatActivity {
         data.put(FirebaseHelper.DATABASE_UNIQUE_ID_FIELD, fbUser.getUid());
         mFirebaseDatabase.collection(FirebaseHelper.DATABASE_COLLECTION_PATH).document(fbUser.getUid()).set(data);
 
+        updateNewToken(fbUser);
 
-        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-            @Override
-            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                if (task.isSuccessful()) {
-                    @SuppressWarnings("ConstantConditions") String idToken = task.getResult().getToken();
-                    Map<String, Object> data = new HashMap<>();
-                    data.put(FirebaseHelper.DATABASE_TOKEN_PATH, idToken);
-                    mFirebaseDatabase.collection(FirebaseHelper.DATABASE_COLLECTION_PATH).document(fbUser.getUid()).update(data);
-                    addUserTestData(data, mFirebaseDatabase);
-                }
-            }
-        });
     }
 
 
