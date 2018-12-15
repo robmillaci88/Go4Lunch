@@ -44,9 +44,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-
+        Log.d("MyFirebaseMessaging", "onMessageReceived: message recieved");
         recievedData = remoteMessage.getData();
+        Log.d("MyFirebaseMessaging", "revieved data is :" + recievedData);
+
         messageFromUserId = recievedData.get(FROM_USER_ID_FIELD);
+
+        Log.d("MyFirebaseMessaging", "message from user id  :" + messageFromUserId);
+
         sendNotification(recievedData);
     }
 
@@ -121,5 +126,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             FirebaseFirestore.getInstance().collection(DATABASE_TOKEN_PATH).document(FirebaseAuth.getInstance().getUid()).update(data);
         }
     }
+
+
 }
 

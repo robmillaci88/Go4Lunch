@@ -39,7 +39,7 @@ var otherdata = context.params.messageCollectionId
             } else {
           var senderName = doc.data().username
           var photoUrl = doc.data().picture
- console.log('name ' + senderName);
+
 	var message = {
   	data: {
     	msg: senderName,

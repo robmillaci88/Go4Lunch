@@ -93,8 +93,9 @@ public class UsersListAdapter extends BaseAdapterClass implements
                             QuerySnapshot taskResults = task.getResult();
                             if (taskResults != null) {
                                 List<DocumentSnapshot> documents = taskResults.getDocuments();
-                                DocumentSnapshot d = documents.get(0);
+
                                 try {
+                                    DocumentSnapshot d = documents.get(0);
                                     addedUIds = d.get(DATABASE_ADDED_USERS_FIELD) == null ? "" : (String) d.get(DATABASE_ADDED_USERS_FIELD); //get the added users UIDs from the database
                                 } catch (Exception e) {
                                     addedUIds = "";
