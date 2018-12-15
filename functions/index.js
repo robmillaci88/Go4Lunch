@@ -28,7 +28,7 @@ var otherdata = context.params.messageCollectionId
           console.log('Document data:', doc.data().token);
 
         var tokenId = doc.data().token
-    	var userId = doc.data().uniqueID
+
 
           db.collection('users').doc(sender)
           .get()
@@ -39,7 +39,7 @@ var otherdata = context.params.messageCollectionId
             } else {
           var senderName = doc.data().username
           var photoUrl = doc.data().picture
-
+            var userId = doc.data().uniqueID
 	var message = {
   	data: {
     	msg: senderName,

@@ -707,6 +707,7 @@ public class FirebaseHelper {
      * @param messageFromUserId the id of the user sending the message
      */
     public static void newMessage(final String messageFromUserId) {
+        Log.d("newMessage", "newMessage: called with message from user is " + messageFromUserId);
         final DocumentReference dbRef = FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId);
 
         dbRef.collection(DATABASE_CHAT_NOTIFICATIONS)
