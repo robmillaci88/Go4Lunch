@@ -62,7 +62,7 @@ public class Notifications extends BroadcastReceiver {
         String title = mContext.getString(R.string.your_lunch_at) + placeName;
         String message;
         if (sb.length() > 0) {
-            message = "Join " + sb.toString() + " @ " + placeAddress;
+            message = String.format("Join %s @ %s", sb.toString(), placeAddress);
         } else {
             message = placeAddress;
         }

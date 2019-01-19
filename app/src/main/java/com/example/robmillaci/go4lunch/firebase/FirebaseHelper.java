@@ -115,7 +115,6 @@ public class FirebaseHelper {
                         QuerySnapshot taskResults = task.getResult();
                         List<DocumentSnapshot> documents = taskResults.getDocuments();
                         String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(","); //split the returned "added users" string
-                        Log.d("getMyWorkUsers", "onComplete: returned users added are " + Arrays.toString(addedUsers));
                         hashSet.addAll(Arrays.asList(addedUsers)); //ensure not duplicates
                         //add the results to an array list for return
                         ArrayList<String> addedUsersArray = new ArrayList<>(hashSet);
@@ -156,10 +155,10 @@ public class FirebaseHelper {
                         if (task.isSuccessful()) {
                             QuerySnapshot taskResults = task.getResult();
                             List<DocumentSnapshot> documents = taskResults.getDocuments();
-                            String userName = "";
-                            String email = "";
-                            String id = "";
-                            String picture = "";
+                            String userName;
+                            String email;
+                            String id;
+                            String picture;
                             try {
                                 DocumentSnapshot d = documents.get(0);
                                 userName = (String) d.get(DATABASE_NAME_FIELD);
@@ -167,7 +166,7 @@ public class FirebaseHelper {
                                 id = (String) d.get(DATABASE_UNIQUE_ID_FIELD);
                                 picture = (String) d.get(DATABASE_PICTURE_FIELD);
 
-                                if (!userName.equals("") && !email.equals("") && !id.equals("")) {
+                                if (!userName.equals("") && !id.equals("")) {
                                     Users user = new Users(userName, id, email, picture);
                                     usersObjects.add(user);
                                 }
@@ -605,7 +604,7 @@ public class FirebaseHelper {
     public void addChatData(final Map<String, Object> chatData, final String chattingTo) {
         final DocumentReference dbRef = FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId);
 
-        FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId).collection(DATABASE_CHAT_COLLECTION)
+        dbRef.collection(DATABASE_CHAT_COLLECTION)
                 .document(chattingTo).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -707,7 +706,6 @@ public class FirebaseHelper {
      * @param messageFromUserId the id of the user sending the message
      */
     public static void newMessage(final String messageFromUserId) {
-        Log.d("newMessage", "newMessage: called with message from user is " + messageFromUserId);
         final DocumentReference dbRef = FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId);
 
         dbRef.collection(DATABASE_CHAT_NOTIFICATIONS)

@@ -167,12 +167,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
             createGoogleMapsFragment();
 
-            //noinspection StatementWithEmptyBody
-//            if (savedInstanceState == null) {
-//                createGoogleMapsFragment();
-//            } else {
-//                // do nothing - fragment is recreated automatically
-//            }
         }
     }
 

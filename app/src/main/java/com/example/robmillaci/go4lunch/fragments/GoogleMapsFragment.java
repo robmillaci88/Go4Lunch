@@ -271,6 +271,7 @@ public class GoogleMapsFragment extends BaseFragment implements
 
 
     private void getGooglePlaces() {
+        Log.d("FUCKKK", "getGooglePlaces: got here");
         //noinspection deprecation
         PlaceDetectionClient mPlaceDetectionClient = Places.getPlaceDetectionClient(getApplicationContext(), null);
         @SuppressLint("MissingPermission") Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
@@ -279,8 +280,8 @@ public class GoogleMapsFragment extends BaseFragment implements
             public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
                 try {
                     likelyPlaces = task.getResult(); //get the results of the mPlaceDetectionClient.getCurrentPlace
-
-                    if (likelyPlaces != null) {
+                    int placeCount = 0;
+                    if (likelyPlaces != null && likelyPlaces.get(0)!=null) {
                         //for each placeLikelihood returned in the task results, get the place type  and check against conditions
                         //We are checking for the following place types
                         //TYPE_RESTAURANT, TYPE_BAR, TYPE_CAFE, TYPE_FOOD
@@ -291,17 +292,21 @@ public class GoogleMapsFragment extends BaseFragment implements
                                         placeType.contains(com.google.android.gms.location.places.Place.TYPE_BAR) ||
                                         placeType.contains(com.google.android.gms.location.places.Place.TYPE_CAFE) ||
                                         placeType.contains(com.google.android.gms.location.places.Place.TYPE_FOOD)) {
-
+                                    placeCount ++;
                                     addMarkersToMap(placeLikelihood.getPlace(), false); //Add the relevant places to the map
                                 }
                             }
                         }
+                        if (placeCount == 0) findPlacesResponse(true);
+                    }else {
+                        findPlacesResponse(true);
                     }
                 } catch (Exception e) {
                     findPlacesResponse(true);
                     e.printStackTrace();
                 }
             }
+
         });
     }
 
@@ -318,7 +323,7 @@ public class GoogleMapsFragment extends BaseFragment implements
             searchingProgressBar.setVisibility(View.GONE);
             searchingText.setVisibility(View.GONE);
         }catch(Exception e){
-            Toast.makeText(getApplicationContext(),"Could not find your location",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.no_location,Toast.LENGTH_LONG).show();
         }
     }
 

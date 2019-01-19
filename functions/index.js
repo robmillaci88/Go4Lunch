@@ -37,8 +37,8 @@ var otherdata = context.params.messageCollectionId
               console.log('No such User document!');
               throw new Error('No such User document!'); //should not occur normally as the notification is a "child" of the user
             } else {
-          var senderName = doc.data().username
-          var photoUrl = doc.data().picture
+           var senderName = doc.data().username
+           var photoUrl = doc.data().picture
             var userId = doc.data().uniqueID
 	var message = {
   	data: {

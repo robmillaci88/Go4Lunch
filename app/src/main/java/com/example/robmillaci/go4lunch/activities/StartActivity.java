@@ -1,6 +1,7 @@
 package com.example.robmillaci.go4lunch.activities;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -34,23 +35,33 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.TwitterAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.auth.User;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.Twitter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.TwitterSession;
+import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_SELECTED_RESTAURANT_FIELD;
 import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_SELECTED_RESTAURANT_ID_FIELD;
-import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_TOKEN_PATH;
 
 /**
  * This class created the first activity presented to a new user<br>
  * It deals with authenticating the user via Facebook or Google and handles the login event
  */
 public class StartActivity extends AppCompatActivity {
+    private static final int GOOGLE_LOGIN_REQUEST_CODE = 1;
+    private static final int FACEBOOK_LOGIN_REQUEST_CODE = 64206;
+    private static final int TWITTER_LOGIN_REQUEST_CODE = TwitterAuthConfig.DEFAULT_AUTH_REQUEST_CODE;
+
     private static final String TAG = "StartActivity";
     private static final String GOOGLE_ID_TOKEN = "476591839693-6ukp9b83561afq71vmbglq0i6f4v0ig2.apps.googleusercontent.com";
 
@@ -63,6 +74,7 @@ public class StartActivity extends AppCompatActivity {
 
     private CallbackManager callbackManager; //the log in callback
     private GoogleSignInClient mGoogleSignInClient; //the GoogleSignInClient
+    private TwitterLoginButton mTwitterLoginButton;
 
 
     @SuppressWarnings("deprecation")
@@ -70,7 +82,12 @@ public class StartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.LauncherTheme);
+
+        Twitter.initialize(this);
+
         setContentView(R.layout.activity_start);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+
         FacebookSdk.sdkInitialize(getApplicationContext()); //initialized the facebook SDK
         AppEventsLogger.activateApp(this); //allows logging of various types of events back to Facebook.
 
@@ -86,7 +103,6 @@ public class StartActivity extends AppCompatActivity {
         facebookLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: called");
                 facebookLoginBtn.callOnClick();
             }
         });
@@ -96,19 +112,17 @@ public class StartActivity extends AppCompatActivity {
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
-                        Log.d(TAG, "onSuccess: called");
                         handleFacebookAccessToken(loginResult.getAccessToken());
                     }
 
                     @Override
                     public void onCancel() {
-                        Log.d(TAG, "onCancel: called");
+                        Toast.makeText(getApplicationContext(), R.string.sign_in_cancel, Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onError(FacebookException exception) {
-                        Log.d(TAG, "onError: " + exception);
-                        Toast.makeText(getApplicationContext(), "Authentication error", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), R.string.auth_error, Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -126,32 +140,95 @@ public class StartActivity extends AppCompatActivity {
         googleLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signIn(); //call the google sign in method
+                signInWithGoogle(); //call the google sign in method
+            }
+        });
+
+
+        mTwitterLoginButton = findViewById(R.id.default_twitter_login_button);
+        mTwitterLoginButton.setCallback(new Callback<TwitterSession>() {
+            @Override
+            public void success(Result<TwitterSession> result) {
+                handleTwitterSession(result.data);
+                Toast.makeText(getApplicationContext(), "Email address is not available with twitter sign in", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void failure(TwitterException exception) {
+                Toast.makeText(getApplicationContext(), "Loggin failed", Toast.LENGTH_LONG).show();
+                updateUI(null);
             }
         });
     }
 
 
     //Create a signInIntent using the Google sign in client to get the sign in intent
-    private void signIn() {
+    private void signInWithGoogle() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, 1);
+        startActivityForResult(signInIntent, GOOGLE_LOGIN_REQUEST_CODE);
     }
 
 
-    //Handles the results of the Google sign in intent and then handle the results using handleSignInResults(task)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case 1:
+            case GOOGLE_LOGIN_REQUEST_CODE:
                 Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                 handleSignInResult(task);
                 break;
 
-            default:
+            case FACEBOOK_LOGIN_REQUEST_CODE:
                 callbackManager.onActivityResult(requestCode, resultCode, data);
+                break;
+
+            case TWITTER_LOGIN_REQUEST_CODE:
+                mTwitterLoginButton.onActivityResult(requestCode, resultCode, data);
+                break;
         }
+    }
+
+    private void handleTwitterSession(TwitterSession session) {
+        AuthCredential credential = TwitterAuthProvider.getCredential(
+                session.getAuthToken().token,
+                session.getAuthToken().secret);
+
+
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                            if (user != null) {
+                                FirebaseUserMetadata metadata = user.getMetadata();
+                                //noinspection ConstantConditions
+                                if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
+                                    // The user is new
+                                    Toast.makeText(StartActivity.this, getString(R.string.welcome) + user.getDisplayName(), Toast.LENGTH_LONG).show();
+                                    addUserToDB(user);
+                                } else {
+                                    Toast.makeText(StartActivity.this, getString(R.string.welcome_back) + user.getDisplayName(), Toast.LENGTH_LONG).show();
+                                    updateNewToken(user);
+                                }
+                                updateUI(user);
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Toast.makeText(StartActivity.this, R.string.auth_failed,
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Toast.makeText(getApplicationContext(), R.string.auth_failed,
+                                    Toast.LENGTH_SHORT).show();
+                            updateUI(null);
+                        }
+
+                        // ...
+                    }
+                });
     }
 
 
@@ -165,7 +242,6 @@ public class StartActivity extends AppCompatActivity {
             }
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
-            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
             Toast.makeText(this, R.string.google_login_failed, Toast.LENGTH_LONG).show();
         }
     }
@@ -205,23 +281,6 @@ public class StartActivity extends AppCompatActivity {
                 });
     }
 
-    private void updateNewToken(final FirebaseUser user) {
-        final FirebaseFirestore mFirebaseDatabase;
-        mFirebaseDatabase = FirebaseFirestore.getInstance();
-        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-            @Override
-            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                if (task.isSuccessful()) {
-                    @SuppressWarnings("ConstantConditions") String idToken = task.getResult().getToken();
-                    Map<String, Object> data = new HashMap<>();
-                    data.put(FirebaseHelper.DATABASE_TOKEN_PATH, idToken);
-                    mFirebaseDatabase.collection(FirebaseHelper.DATABASE_COLLECTION_PATH).document(user.getUid()).update(data);
-                    addUserTestData(data, mFirebaseDatabase);
-                }
-            }
-        });
-    }
-
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -232,7 +291,6 @@ public class StartActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
-
                             if (user != null) {
                                 FirebaseUserMetadata metadata = user.getMetadata();
                                 //noinspection ConstantConditions
@@ -250,6 +308,8 @@ public class StartActivity extends AppCompatActivity {
                                 Toast.makeText(StartActivity.this, R.string.auth_failed,
                                         Toast.LENGTH_SHORT).show();
                             }
+                        } else {
+                            Toast.makeText(getApplicationContext(), R.string.account_email_clash, Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -261,6 +321,7 @@ public class StartActivity extends AppCompatActivity {
      * Once the user has been authenticated, log in and added to the database. launch the MainActivity
      */
     private void updateUI(FirebaseUser user) {
+        Log.d(TAG, "updateUI: called with user " + user);
         if (user != null) {
             Intent launchMain = new Intent(this, MainActivity.class);
             loggedInUser = mAuth.getCurrentUser().getDisplayName();
@@ -301,7 +362,29 @@ public class StartActivity extends AppCompatActivity {
         mFirebaseDatabase.collection(FirebaseHelper.DATABASE_COLLECTION_PATH).document(fbUser.getUid()).set(data);
 
         updateNewToken(fbUser);
+    }
 
+    /**
+     * Called to update new tokens for users, this is called initially, and when a user reinstalls the application
+     * to ensure we have a valid token for messaging services
+     *
+     * @param user the user whos token is to be updated.
+     */
+    private void updateNewToken(final FirebaseUser user) {
+        final FirebaseFirestore mFirebaseDatabase;
+        mFirebaseDatabase = FirebaseFirestore.getInstance();
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if (task.isSuccessful()) {
+                    @SuppressWarnings("ConstantConditions") String idToken = task.getResult().getToken();
+                    Map<String, Object> data = new HashMap<>();
+                    data.put(FirebaseHelper.DATABASE_TOKEN_PATH, idToken);
+                    mFirebaseDatabase.collection(FirebaseHelper.DATABASE_COLLECTION_PATH).document(user.getUid()).update(data);
+                    addUserTestData(data, mFirebaseDatabase);
+                }
+            }
+        });
     }
 
 

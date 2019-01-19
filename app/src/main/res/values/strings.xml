@@ -23,7 +23,6 @@
     <string name="no_website_found">No website found</string>
     <string name="no_phone_number">No phone number found</string>
     <string name="google_login_failed">Login failed</string>
-    <string name="auth_failed">Authentication failed.</string>
     <string name="welcome_back">Welcome back\u0020</string>
     <string name="hasnt_decided_yet">hasn\'t decided yet</string>
     <string name="eating_at">%s is eating at %s</string>
@@ -89,7 +88,7 @@
     <string name="error_getting_reviews">Error getting pojoPlace reviews</string>
     <string name="no_reviews_found">No place reviews found</string>
     <string name="friend_added">Friend added!</string>
-    <string name="no_places_found">Could not find any local places to eat!</string>
+    <string name="no_places_found">Could not find any places close to you - check friends locations!</string>
     <string name="google_services_error">Google Services is not installed, up-to-date, or enabled</string>
     <string name="google_services_not_available">Google services not currently available</string>
     <string name="welcome">Welcome to Go4Lunch\u0020</string>
@@ -99,4 +98,13 @@
     <string name="error_getting_details">Error getting some place details, please check your network</string>
     <string name="no_place_selected_yet">You haven\'t chosen a place to eat yet!</string>
     <string name="marker_already_added">This marker has already been added to the map</string>
+    <string name="account_email_clash">An account with this email already exists with a different provider</string>
+    <string name="auth_failed">Authentication failed.</string>
+    <string name="sign_in_cancel">sign in cancelled</string>
+    <string name="auth_error">authentication error</string>
+    <string name="com.twitter.sdk.android.CONSUMER_KEY">GZqKO4C89x8xwadelwZtz9EF3</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET">rq385i4DhG0InVieBLvY9jc24ztdR2g5okMLvBAiupl7YLiyC1</string>
+    <string name="no_location">Could not find your location</string>
+    <string name="settings_activity_title">Settings</string>
+    <string name="no_internet">No internet available</string>
 </resources>

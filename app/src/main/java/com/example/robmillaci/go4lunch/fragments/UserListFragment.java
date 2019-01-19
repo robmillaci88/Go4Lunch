@@ -22,7 +22,6 @@ import com.example.robmillaci.go4lunch.adapters.UsersListAdapter;
 import com.example.robmillaci.go4lunch.data_objects.Users;
 import com.example.robmillaci.go4lunch.firebase.FirebaseHelper;
 import com.example.robmillaci.go4lunch.utils.RecyclerViewMods;
-import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
 

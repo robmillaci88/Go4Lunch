@@ -1,7 +1,10 @@
 package com.example.robmillaci.go4lunch.activities;
 
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 
@@ -18,6 +21,12 @@ import java.util.ArrayList;
  */
 
 public abstract class BaseActivity extends AppCompatActivity implements FirebaseHelper.firebaseDataCallback {
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+    }
 
     @Override
     protected void onResume() {

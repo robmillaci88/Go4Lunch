@@ -36,8 +36,8 @@
 
     <ImageView
         android:id="@+id/imageView7"
-        android:layout_width="286dp"
-        android:layout_height="235dp"
+        android:layout_width="200dp"
+        android:layout_height="150dp"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -83,7 +83,6 @@
         android:layout_width="200dp"
         android:layout_height="36dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/signin_with_google"
         android:visibility="gone"
@@ -118,6 +117,18 @@
         app:layout_constraintStart_toStartOf="@+id/facebook_login"
         app:layout_constraintTop_toBottomOf="@+id/facebook_login"
         app:layout_constraintVertical_bias="0.01999998" />
+
+    <!-- default twitter login button -->
+    <com.twitter.sdk.android.core.identity.TwitterLoginButton
+        android:id="@+id/default_twitter_login_button"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintEnd_toEndOf="@+id/google_login"
+        app:layout_constraintStart_toStartOf="@+id/google_login"
+        app:layout_constraintTop_toBottomOf="@+id/google_login" />
 
     <TextView
         android:id="@+id/textView2"
