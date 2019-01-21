@@ -22,7 +22,5 @@ public class Venue {
         return categories;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+
 }

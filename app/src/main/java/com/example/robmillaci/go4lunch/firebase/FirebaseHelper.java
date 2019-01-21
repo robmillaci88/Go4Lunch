@@ -2,7 +2,6 @@ package com.example.robmillaci.go4lunch.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
 import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
@@ -243,7 +242,7 @@ public class FirebaseHelper {
 
 
     /**
-     * Add the selected place to the database - firstly deleting the old selected place data and then adding the new infromation
+     * Add the selected place to the database - firstly deleting the old selected place data and then adding the new information
      *
      * @param markerId   - the id of the marker related to this place so at the same time we can update the marker information
      * @param placeId    - the id of the place that has been selected
@@ -279,7 +278,7 @@ public class FirebaseHelper {
         FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(getmCurrentUserId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                StringBuilder sb = new StringBuilder(); //Stringbuilder to create the new liked places CSV string
+                StringBuilder sb = new StringBuilder(); //String builder to create the new liked places CSV string
 
                 if (task.isSuccessful()) {
                     DocumentSnapshot taskResults = task.getResult();
@@ -310,7 +309,7 @@ public class FirebaseHelper {
      * Determines wether a specific placeId is selected to eat at.
      *
      * @param placeId the id of the place to check
-     * @param users   the list of friends of the user, this is important because we dont want to display information about 'non friend' users
+     * @param users   the list of friends of the user, this is important because we don't want to display information about 'non friend' users
      */
     public void isPlaceSelected(final String placeId, final String[] users) {
         FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -336,7 +335,7 @@ public class FirebaseHelper {
                             }
 
                             if (usersSelectedThisPlace.size() > 0) {
-                                //check wether the current user has selected this place and wether otherusers in the app have also selected this place
+                                //check wether the current user has selected this place and wether other users in the app have also selected this place
                                 if (usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() > 1) {
                                     mFirebaseDataCallback.isPlaceSelected(true, true);
                                 } else if (usersSelectedThisPlace.contains(mCurrentUserId) && usersSelectedThisPlace.size() == 1) {
@@ -516,7 +515,6 @@ public class FirebaseHelper {
                 if (task.isSuccessful()) {
                     final QuerySnapshot taskResults = task.getResult();
                     List<DocumentSnapshot> documents = taskResults.getDocuments();
-                    //todo handle added users does not equal null
                     if (documents.get(0).get(DATABASE_ADDED_USERS_FIELD) != null) {
                         String[] addedUsers = documents.get(0).get(DATABASE_ADDED_USERS_FIELD).toString().split(","); //split the returned users CSV string into a String[]
                         //noinspection unchecked
@@ -576,7 +574,7 @@ public class FirebaseHelper {
                     } else {
                         getUsersEatingHereError(friendsEatingHere, v);
                     }
-                } else { //if the task isnt successful, callback with an Array of size 0
+                } else { //if the task isn't successful, callback with an Array of size 0
                     getUsersEatingHereError(friendsEatingHere, v);
                 }
             }
@@ -599,7 +597,7 @@ public class FirebaseHelper {
      * Adds users chat data to the database
      *
      * @param chatData   - Map holding the chat data
-     * @param chattingTo - the user the recieving the chat data
+     * @param chattingTo - the user the receiving the chat data
      */
     public void addChatData(final Map<String, Object> chatData, final String chattingTo) {
         final DocumentReference dbRef = FirebaseFirestore.getInstance().collection(DATABASE_COLLECTION_PATH).document(mCurrentUserId);
@@ -732,7 +730,7 @@ public class FirebaseHelper {
 
 
     /**
-     * This is called from the userlist recyvler view when binding the viewholder, it is used to determine wether we should display a "new message" chat icon
+     * This is called from the user list recycler view when binding the viewholder, it is used to determine wether we should display a "new message" chat icon
      *
      * @param userID     the id of the user to check
      * @param viewHolder the viewholder associated with this user

@@ -89,7 +89,7 @@ public class ChatActivityAdapter extends RecyclerView.Adapter<ChatActivityAdapte
         holder.timeStamp.setText(time); //set the time stamp of the message
         holder.messageBody.setText(chatMessage); //set the message body
 
-        //Depending on wether the message is sent or recieves, load the specific users picture into the imageview
+        //Depending on wether the message is sent or receives, load the specific users picture into the imageview
         switch (holder.getItemViewType()){
             case VIEW_TYPE_MESSAGE_RECIEVED:
                 Picasso.get().load(mChattingToPic).into(holder.userPic);

@@ -1,5 +1,6 @@
 package com.example.robmillaci.go4lunch.firebase;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -30,12 +31,7 @@ import java.util.Map;
 import static com.example.robmillaci.go4lunch.firebase.FirebaseHelper.DATABASE_TOKEN_PATH;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
-    /**
-     * Called when message is received from trigger on firestore chat.
-     * see Functions -> index.js
-     */
-    Map<String, String> recievedData;
-    String messageFromUserId;
+    private String messageFromUserId;
 
     private static final String FROM_USER_ID_FIELD = "uId";
     private static final String FROM_USER_NAME_FIELD = "msg";
@@ -44,13 +40,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        Log.d("MyFirebaseMessaging", "onMessageReceived: message recieved");
-        recievedData = remoteMessage.getData();
-        Log.d("MyFirebaseMessaging", "revieved data is :" + recievedData);
+        /*
+      Called when message is received from trigger on firestore chat.
+      see Functions -> index.js
+     */
+        Map<String, String> recievedData = remoteMessage.getData();
 
         messageFromUserId = recievedData.get(FROM_USER_ID_FIELD);
-
-        Log.d("MyFirebaseMessaging", "message from user id  :" + messageFromUserId);
 
         sendNotification(recievedData);
     }
@@ -65,7 +61,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
+        @SuppressLint("IconColors") NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
                 .setContentTitle(getString(R.string.new_message_notification))
                 .setContentText(data.get(FROM_USER_NAME_FIELD) + getString(R.string.new_message_from))
                 .setAutoCancel(true)

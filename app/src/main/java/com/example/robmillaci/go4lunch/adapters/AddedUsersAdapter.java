@@ -139,7 +139,7 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
                     QuerySnapshot taskResults = task.getResult();
                     assert taskResults != null;
                     List<DocumentSnapshot> documents = taskResults.getDocuments();
-                    DocumentSnapshot d = documents.get(0); //get the document snapshow from the task results
+                    DocumentSnapshot d = documents.get(0); //get the document snapshot from the task results
 
                     try {
                         addedUIds = (String) d.get(FirebaseHelper.DATABASE_ADDED_USERS_FIELD); //retrieve the String that relates to this users 'addedUsers'
@@ -153,7 +153,7 @@ public class AddedUsersAdapter extends BaseAdapterClass implements Filterable {
                     int count = 0;
                     for (String s : currentAddedUsers) { //loop through all added users
                         count++;
-                        if (count == 1 & !s.equals(idToRemove)) { //if this is the first iteration and the ID is not being removed, append the users ID to the newAddedUsers stringbuilder
+                        if (count == 1 & !s.equals(idToRemove)) { //if this is the first iteration and the ID is not being removed, append the users ID to the newAddedUsers string builder
                             newAddedUsers.append(s);
                         } else if (!s.equals(idToRemove)) { //if this is NOT the first iteration and the Id is not being removed, append a , to generated CSV
                             newAddedUsers.append(",").append(s);

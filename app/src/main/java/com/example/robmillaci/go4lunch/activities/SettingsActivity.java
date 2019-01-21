@@ -3,10 +3,9 @@ package com.example.robmillaci.go4lunch.activities;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -22,10 +21,8 @@ public class SettingsActivity extends AppCompatActivity {
     private static int defaultPlacesSearchZoomVal = 0;
 
 
-    SeekBar mapZoomProgBar;
-    SeekBar placesSearchZoomProgBar;
-    TextView mapZoomVal;
-    TextView placesSearchZoomVal;
+    private TextView mapZoomVal;
+    private TextView placesSearchZoomVal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +35,10 @@ public class SettingsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true); //adds the home button to the action bar to navigate back from this activity
         }
 
-        mapZoomProgBar = findViewById(R.id.map_zoom_prog_bar);
+        SeekBar mapZoomProgBar = findViewById(R.id.map_zoom_prog_bar);
         mapZoomVal = findViewById(R.id.map_zoom_val);
 
-        placesSearchZoomProgBar = findViewById(R.id.places_search_zoom_progress);
+        SeekBar placesSearchZoomProgBar = findViewById(R.id.places_search_zoom_progress);
         placesSearchZoomVal = findViewById(R.id.places_search_zoom_val);
 
 
@@ -80,7 +77,6 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-
         placesSearchZoomProgBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -103,21 +99,21 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     @SuppressLint("ApplySharedPref")
-    private void saveToPrefs(){
+    private void saveToPrefs() {
         SharedPreferences.Editor spEditor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        spEditor.putInt(DEFAULT_ZOOM_KEY,defaultZoomVal);
+        spEditor.putInt(DEFAULT_ZOOM_KEY, defaultZoomVal);
         spEditor.putInt(PLACES_SEARCH_ZOOM_KEY, defaultPlacesSearchZoomVal);
         spEditor.commit();
     }
 
-    private int restoreDefaultZoom(){
+    private int restoreDefaultZoom() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        return sp.getInt(DEFAULT_ZOOM_KEY,13);
+        return sp.getInt(DEFAULT_ZOOM_KEY, 13);
     }
 
-    private int restorePlacesSearchZoom(){
+    private int restorePlacesSearchZoom() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        return sp.getInt(PLACES_SEARCH_ZOOM_KEY,18);
+        return sp.getInt(PLACES_SEARCH_ZOOM_KEY, 18);
     }
 
 }

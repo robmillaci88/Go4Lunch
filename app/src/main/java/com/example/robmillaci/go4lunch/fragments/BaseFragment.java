@@ -1,11 +1,8 @@
 package com.example.robmillaci.go4lunch.fragments;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 
 import com.example.robmillaci.go4lunch.adapters.AddedUsersAdapter;
 import com.example.robmillaci.go4lunch.data_objects.Users;
@@ -23,7 +20,6 @@ public abstract class BaseFragment extends Fragment implements FirebaseHelper.fi
     public static final int LIKED_RESTAURANT_FRAGMENT = 1;
     public static final int RESTAURANT_LIST_FRAGMENT = 2;
     public static final int USER_LIST_FRAGMENT = 3;
-    public static final int NAV_DRAWER = 4;
 
 
     @Override

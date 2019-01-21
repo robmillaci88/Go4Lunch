@@ -58,7 +58,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
     private FloatingActionButton selectedFab; //The action button to 'select' this place
     private TabLayout.Tab starLikeTab; //The tab to 'like' this place
     private RecyclerView peopleEatingRecyclerView; //Recycler view displaying the list of all friends 'eating' here
-    private ProgressBar eaterprogressbar; //progress bar to display while getting users eatin
+    private ProgressBar eaterprogressbar; //progress bar to display while getting users eating
 
     private PojoPlace mPojoPlace; //The place this activity is displaying data for
     private Marker mMarker; //The marker that relates to this place
@@ -71,7 +71,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
     /**
      * Instantiates {@link FirebaseHelper} and {@link PhotoDownloader}<br>
      * Create the recyclerview as well as all relevant views for this Activity<br>
-     * Retrieves the specific googleMaps marker and stores a reference so we can 'select' or 'unselect' the marker {@link GoogleMapsFragment#getSpecificMarker(String)}<br>
+     * Retrieves the specific googleMaps marker and stores a reference so we can 'select' or 'de select' the marker {@link GoogleMapsFragment#getSpecificMarker(String)}<br>
      * Some data is unavailable with the GooglePlaces SDK. {@link #getAdditionalPlaceData()} retrieves this extra required data.<br>
      * Also handle the events of clicking on {@link #selectedFab} and the events of clicking the tabs<br>
      *
@@ -105,7 +105,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
         if (mPojoPlace != null) {
             mMarker = GoogleMapsFragment.getSpecificMarker(mPojoPlace.getName()); //Retrieve the specific marker for this place
 
-            // Set the name, rating, web url, placeId, phonenumber and location
+            // Set the name, rating, web url, placeId, phone number and location
             name.setText(mPojoPlace.getName());
             rating.setRating(mPojoPlace.getRating());
             webaddress = mPojoPlace.getWebsite();
@@ -117,7 +117,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
 
         getAdditionalPlaceData(); //see method comments
 
-        firebaseHelper.getMyWorkUsers(null); //get this users added friends so we can check if any of them have selected this place. Callsback to 'workUsersDataCallback'
+        firebaseHelper.getMyWorkUsers(null); //get this users added friends so we can check if any of them have selected this place. Calls back to 'workUsersDataCallback'
 
         selectedFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -344,7 +344,7 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
      * Callback from {@link FirebaseHelper#getUsersEatingHere} to create the recycler view of users eating at this place
      *
      * @param users the list of users eating here
-     * @param v     not used in this overridden method as we dont have any viewholders to update
+     * @param v     not used in this overridden method as we don't have any view holders to update
      */
     @Override
     public void finishGettingUsersEatingHere(ArrayList<Users> users, RecyclerView.ViewHolder v) {

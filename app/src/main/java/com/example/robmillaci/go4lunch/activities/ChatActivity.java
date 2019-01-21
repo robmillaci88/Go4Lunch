@@ -74,9 +74,9 @@ public class ChatActivity extends AppCompatActivity implements FirebaseHelper.ch
 
 
         if (getIntent().getExtras() != null) {
-            chattingToId = getIntent().getExtras().getString(CHATTING_TO_ID); //the id of the user recieving the messages
-            chattingToName = getIntent().getExtras().getString(CHATTING_TO); //the name of the user recieving the messages
-            chattingToPicture = getIntent().getExtras().getString(CHATTING_TO_PIC); //the picture of the user recieving the messages
+            chattingToId = getIntent().getExtras().getString(CHATTING_TO_ID); //the id of the user receiving the messages
+            chattingToName = getIntent().getExtras().getString(CHATTING_TO); //the name of the user receiving the messages
+            chattingToPicture = getIntent().getExtras().getString(CHATTING_TO_PIC); //the picture of the user receiving the messages
             currentUserPicture = getIntent().getExtras().getString(CURRENT_USER_PIC); //the picture of the user sending the messages
         }
 
@@ -121,7 +121,7 @@ public class ChatActivity extends AppCompatActivity implements FirebaseHelper.ch
      * this is called once we have retrieved chat history<br>
      *
      * @param messagesSent     - The list of messages sent to the message receiver<br>
-     * @param messagesRecieved - The listo of messages recieved from the message receiver<br>
+     * @param messagesRecieved - The lis of messages recieved from the message receiver<br>
      *                         <br>
      *                         Add all messagesSent and messagesRecieved to an array list and then sorted by date in descending order<br>
      *                         Once the arraylist has been sorted, create the Recyclerview adapter and set<br>

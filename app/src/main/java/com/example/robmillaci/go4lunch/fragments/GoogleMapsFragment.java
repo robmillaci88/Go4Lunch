@@ -89,7 +89,7 @@ public class GoogleMapsFragment extends BaseFragment implements
     private static HashMap<String, Marker> allMarkers; //Map of all markers
     private static ArrayList<Marker> selectedMarkers; //List to hold all selected markers
     private static LatLng currentlocationLatLon; //the users current location latitude and longitude
-    private static GoogleMap mGoogleMap; //Googlemap to be displayed in the mapview
+    private static GoogleMap mGoogleMap; //Google map to be displayed in the map view
     private static PojoPlace eatingAtPlace; // the place the user has selected to eat at
 
     private HashMap<String, PojoPlace> originalPlaces; //Map to keep track of the original places, used in filtering
@@ -98,12 +98,12 @@ public class GoogleMapsFragment extends BaseFragment implements
     private FirebaseHelper firebaseHelper; //Reference to FirebaseHelper class
     private GoogleApiClient mGoogleApiClient; //The google API client
     private FusedLocationProviderClient mFusedLocationClient; //Fused location client for users location and updates
-    private CameraPosition cameraPosition; //The position of the googlemaps camera
+    private CameraPosition cameraPosition; //The position of the google maps camera
     private LocationCallback mLocationCallback; //the callback for location changes
     private PlaceLikelihoodBufferResponse likelyPlaces; //Likely places returned by google placeDetectionClient
     private MapView mMapView; //the mapView
 
-    private ImageView searchingImg; //The image displaed when the app is searching for places
+    private ImageView searchingImg; //The image displayed when the app is searching for places
     private TextView searchingText; //The text displayed when the app is searching for places
     private ProgressBar searchingProgressBar; //The progress bar displayed when the app is searching for places
 
@@ -271,7 +271,6 @@ public class GoogleMapsFragment extends BaseFragment implements
 
 
     private void getGooglePlaces() {
-        Log.d("FUCKKK", "getGooglePlaces: got here");
         //noinspection deprecation
         PlaceDetectionClient mPlaceDetectionClient = Places.getPlaceDetectionClient(getApplicationContext(), null);
         @SuppressLint("MissingPermission") Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
@@ -281,7 +280,7 @@ public class GoogleMapsFragment extends BaseFragment implements
                 try {
                     likelyPlaces = task.getResult(); //get the results of the mPlaceDetectionClient.getCurrentPlace
                     int placeCount = 0;
-                    if (likelyPlaces != null && likelyPlaces.get(0)!=null) {
+                    if (likelyPlaces != null && likelyPlaces.get(0) != null) {
                         //for each placeLikelihood returned in the task results, get the place type  and check against conditions
                         //We are checking for the following place types
                         //TYPE_RESTAURANT, TYPE_BAR, TYPE_CAFE, TYPE_FOOD
@@ -292,13 +291,13 @@ public class GoogleMapsFragment extends BaseFragment implements
                                         placeType.contains(com.google.android.gms.location.places.Place.TYPE_BAR) ||
                                         placeType.contains(com.google.android.gms.location.places.Place.TYPE_CAFE) ||
                                         placeType.contains(com.google.android.gms.location.places.Place.TYPE_FOOD)) {
-                                    placeCount ++;
+                                    placeCount++;
                                     addMarkersToMap(placeLikelihood.getPlace(), false); //Add the relevant places to the map
                                 }
                             }
                         }
                         if (placeCount == 0) findPlacesResponse(true);
-                    }else {
+                    } else {
                         findPlacesResponse(true);
                     }
                 } catch (Exception e) {
@@ -322,8 +321,8 @@ public class GoogleMapsFragment extends BaseFragment implements
             searchingImg.setVisibility(View.GONE);
             searchingProgressBar.setVisibility(View.GONE);
             searchingText.setVisibility(View.GONE);
-        }catch(Exception e){
-            Toast.makeText(getApplicationContext(), R.string.no_location,Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), R.string.no_location, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -378,7 +377,7 @@ public class GoogleMapsFragment extends BaseFragment implements
 
 
     @Override
-    public void onPause() { //ensure that we disconnect the googleAPIclient and the FusedLocationClient when the app is paused as we don't want background activity
+    public void onPause() { //ensure that we disconnect the google API client and the FusedLocationClient when the app is paused as we don't want background activity
         super.onPause();
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
@@ -408,14 +407,14 @@ public class GoogleMapsFragment extends BaseFragment implements
     public void workUsersDataCallback(ArrayList<Users> userList, Object o) {
         //As the current user is filtered out from the firebase helper methods, we need to add the current user in here to see our selected place
         ArrayList<Users> usersArrayList = userList;
-        if(usersArrayList == null){
+        if (usersArrayList == null) {
             usersArrayList = new ArrayList<>();
         }
 
-        usersArrayList.add(new Users(StartActivity.loggedInUser, StartActivity.loggedinUserId,
+        usersArrayList.add(new Users(StartActivity.loggedInUser, StartActivity.loggedInUserId,
                 StartActivity.loggedInEmail, StartActivity.loggedInPic));
         for (Users u : usersArrayList) {
-            if (!("").equals(u.getUserID()) && !u.getUserID().equals(StartActivity.loggedinUserId)) { //we want to separate the logged in users selected place
+            if (!("").equals(u.getUserID()) && !u.getUserID().equals(StartActivity.loggedInUserId)) { //we want to separate the logged in users selected place
                 firebaseHelper.getSelectedPlace(u.getUserID(), null);
             }
 
@@ -450,7 +449,7 @@ public class GoogleMapsFragment extends BaseFragment implements
      * @param places              the list of the returned places
      * @param placeBufferResponse the placeBufferResponse so we can close it once we are finished
      */
-    public void gotplaces(ArrayList<com.google.android.gms.location.places.Place> places, final PlaceBufferResponse placeBufferResponse) {
+    private void gotplaces(ArrayList<com.google.android.gms.location.places.Place> places, final PlaceBufferResponse placeBufferResponse) {
         for (com.google.android.gms.location.places.Place p : places) {
             addMarkersToMap(p, true);
         }
@@ -512,7 +511,7 @@ public class GoogleMapsFragment extends BaseFragment implements
             protected FilterResults performFiltering(CharSequence constraint) {
                 String charString = constraint.toString();
                 if (charString.isEmpty()) {
-                    filteredPlaces = originalPlaces; //if the constraint is "" , we set the filteresPlaces Map to the original
+                    filteredPlaces = originalPlaces; //if the constraint is "" , we set the filtered Places Map to the original
                 } else {
                     HashMap<String, PojoPlace> queryfilteredList = new HashMap<>();
                     for (String key : originalPlaces.keySet()) { //loop through the key set of the originalPlaces map
@@ -570,26 +569,30 @@ public class GoogleMapsFragment extends BaseFragment implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == GooglePlacesAutoComplete.PLACE_AUTOCOMPLETE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                com.google.android.gms.location.places.Place place = PlaceAutocomplete.getPlace(this.getActivity(), data);
+            switch (resultCode) {
+                case RESULT_OK:
+                    com.google.android.gms.location.places.Place place = PlaceAutocomplete.getPlace(this.getActivity(), data);
 
-                if (mPlaces.containsKey(place.getName().toString())) {
-                    Toast.makeText(getActivity(), R.string.marker_already_added, Toast.LENGTH_LONG).show();
-                } else {
-                    addMarkersToMap(place, false);
-                }
+                    if (mPlaces.containsKey(place.getName().toString())) {
+                        Toast.makeText(getActivity(), R.string.marker_already_added, Toast.LENGTH_LONG).show();
+                    } else {
+                        addMarkersToMap(place, false);
+                    }
 
-                cameraPosition = new CameraPosition.Builder().target(place.getLatLng()).zoom(PLACES_SEARCH_API_ZOOM).build();
-                mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    cameraPosition = new CameraPosition.Builder().target(place.getLatLng()).zoom(PLACES_SEARCH_API_ZOOM).build();
+                    mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this.getActivity(), data);
-                Log.d("onActivityResult", "onActivityResult: " + status);
-            } else //noinspection StatementWithEmptyBody
-                if (resultCode == RESULT_CANCELED) {
+                    break;
+                case PlaceAutocomplete.RESULT_ERROR:
+                    Status status = PlaceAutocomplete.getStatus(this.getActivity(), data);
+                    Log.d("onActivityResult", "onActivityResult: " + status);
+                    break;
+//noinspection StatementWithEmptyBody
+                case RESULT_CANCELED:
                     // The user canceled the operation.
-                }
+                    break;
+            }
         }
     }
 
@@ -681,12 +684,12 @@ public class GoogleMapsFragment extends BaseFragment implements
 
     }
 
-    public int getDefaultZoomVal() {
+    private int getDefaultZoomVal() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         return sp.getInt(DEFAULT_ZOOM_KEY, 13);
     }
 
-    public int getDefaultPlacesSearchZoomVal() {
+    private int getDefaultPlacesSearchZoomVal() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         return sp.getInt(PLACES_SEARCH_ZOOM_KEY, 18);
     }

@@ -1,7 +1,7 @@
 package com.example.robmillaci.go4lunch.data_objects.chat_objects;
 
 /**
- * This class is reponsible for create ChatObjects user in {@link com.example.robmillaci.go4lunch.adapters.ChatActivityAdapter}
+ * This class is responsible for create ChatObjects user in {@link com.example.robmillaci.go4lunch.adapters.ChatActivityAdapter}
  */
 public class ChatObject {
     private final String dateString; //the date the message was sent

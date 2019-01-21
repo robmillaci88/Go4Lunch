@@ -70,7 +70,7 @@ public class StartActivity extends AppCompatActivity {
     public static String loggedInUser; //the logged in user
     public static String loggedInEmail; //the logged in users email
     public static String loggedInPic; //the logged in users picture
-    public static String loggedinUserId; //the logged in users picture
+    public static String loggedInUserId; //the logged in users picture
 
     private CallbackManager callbackManager; //the log in callback
     private GoogleSignInClient mGoogleSignInClient; //the GoogleSignInClient
@@ -155,7 +155,7 @@ public class StartActivity extends AppCompatActivity {
 
             @Override
             public void failure(TwitterException exception) {
-                Toast.makeText(getApplicationContext(), "Loggin failed", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Login failed", Toast.LENGTH_LONG).show();
                 updateUI(null);
             }
         });
@@ -232,7 +232,7 @@ public class StartActivity extends AppCompatActivity {
     }
 
 
-    //Get the results of the sign in intent and if successful, authenticate the users with fireback
+    //Get the results of the sign in intent and if successful, authenticate the users with firebase
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
@@ -265,7 +265,7 @@ public class StartActivity extends AppCompatActivity {
                                     Toast.makeText(StartActivity.this, getString(R.string.welcome) + user.getDisplayName(), Toast.LENGTH_LONG).show();
                                     addUserToDB(user);
                                 } else {
-                                    //The user is not a new user, dont re-add to the database but display a welcome back message
+                                    //The user is not a new user, don't re-add to the database but display a welcome back message
                                     Toast.makeText(StartActivity.this, getString(R.string.welcome_back) + user.getDisplayName(), Toast.LENGTH_LONG).show();
                                     updateNewToken(user);
                                 }
@@ -327,7 +327,7 @@ public class StartActivity extends AppCompatActivity {
             loggedInUser = mAuth.getCurrentUser().getDisplayName();
             loggedInEmail = mAuth.getCurrentUser().getEmail();
             loggedInPic = mAuth.getCurrentUser().getPhotoUrl().toString();
-            loggedinUserId = mAuth.getCurrentUser().getUid();
+            loggedInUserId = mAuth.getCurrentUser().getUid();
 
             startActivity(launchMain);
         }
@@ -365,10 +365,10 @@ public class StartActivity extends AppCompatActivity {
     }
 
     /**
-     * Called to update new tokens for users, this is called initially, and when a user reinstalls the application
+     * Called to update new tokens for users, this is called initially, and when a user re installs the application
      * to ensure we have a valid token for messaging services
      *
-     * @param user the user whos token is to be updated.
+     * @param user the user token to be updated.
      */
     private void updateNewToken(final FirebaseUser user) {
         final FirebaseFirestore mFirebaseDatabase;

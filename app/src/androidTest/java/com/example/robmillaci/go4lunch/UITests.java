@@ -7,7 +7,6 @@ import android.support.test.espresso.ViewAssertion;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.intent.Intents;
-import android.support.test.espresso.matcher.RootMatchers;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -39,7 +38,6 @@ import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 
-import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeText;
@@ -53,8 +51,6 @@ import static android.support.test.espresso.matcher.ViewMatchers.withContentDesc
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -70,7 +66,7 @@ public class UITests {
             new ActivityTestRule<>(StartActivity.class);
 
     @Rule
-    public ActivityTestRule<MainActivity> mMainActivityActivityTestRule =
+    public final ActivityTestRule<MainActivity> mMainActivityActivityTestRule =
             new ActivityTestRule<>(MainActivity.class);
 
 
@@ -239,7 +235,7 @@ public class UITests {
     }
 
     @Test
-    public void checkNumberofUsersEatingHereMatchesRecyclerView() {
+    public void checkNumberOfUsersEatingHereMatchesRecyclerView() {
 //wait for the places to settle
         try {
             Thread.sleep(3000);
@@ -499,7 +495,7 @@ public class UITests {
 
 
     @Test
-    public void placesSearch(){
+    public void placesSearch() {
         String searchText = "2 Dunsley vale swindon";
         String matchingText = "2 Dunsley Vale";
 
@@ -529,7 +525,7 @@ public class UITests {
             e.printStackTrace();
         }
 
-        HashMap<String,Marker> markers = GoogleMapsFragment.getAllMarkers();
+        HashMap<String, Marker> markers = GoogleMapsFragment.getAllMarkers();
         assertTrue(markers.containsKey(matchingText));
     }
 }

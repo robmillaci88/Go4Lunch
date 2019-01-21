@@ -7,7 +7,7 @@ import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 
 /**
- * Custom textview class that applies a custom font to all instances
+ * Custom text view class that applies a custom font to all instances
  */
 public class CustomTextView extends AppCompatTextView {
     public CustomTextView(Context context, @Nullable AttributeSet attrs) {

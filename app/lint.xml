@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="IconColors">
+        <ignore path="src/main/res/drawable/lunch_icon.png" />
+    </issue>
+    <issue id="IconLauncherShape">
+        <ignore path="src/main/res/drawable/lunch_icon.png" />
+    </issue>
+    <issue id="IconLocation">
+        <ignore path="src/main/res/drawable/add_contact.png" />
+        <ignore path="src/main/res/drawable/add_restaurant.png" />
+        <ignore path="src/main/res/drawable/back.png" />
+        <ignore path="src/main/res/drawable/backgrnd.png" />
+        <ignore path="src/main/res/drawable/backgrndblur.jpg" />
+        <ignore path="src/main/res/drawable/blackboard.png" />
+        <ignore path="src/main/res/drawable/chat.png" />
+        <ignore path="src/main/res/drawable/checked.png" />
+        <ignore path="src/main/res/drawable/cutlery.png" />
+        <ignore path="src/main/res/drawable/delete.png" />
+        <ignore path="src/main/res/drawable/dishimg.png" />
+        <ignore path="src/main/res/drawable/distance.png" />
+        <ignore path="src/main/res/drawable/emptyplate.jpg" />
+        <ignore path="src/main/res/drawable/like.png" />
+        <ignore path="src/main/res/drawable/like_selected.png" />
+        <ignore path="src/main/res/drawable/list.png" />
+        <ignore path="src/main/res/drawable/list_selected.png" />
+        <ignore path="src/main/res/drawable/login_with_facebook.png" />
+        <ignore path="src/main/res/drawable/logout.png" />
+        <ignore path="src/main/res/drawable/lunch_icon.png" />
+        <ignore path="src/main/res/drawable/map_icon.png" />
+        <ignore path="src/main/res/drawable/map_icon_select.png" />
+        <ignore path="src/main/res/drawable/marker_green.png" />
+        <ignore path="src/main/res/drawable/marker_orange.png" />
+        <ignore path="src/main/res/drawable/nav_bar_banner.png" />
+        <ignore path="src/main/res/drawable/nav_menu_background.jpeg" />
+        <ignore path="src/main/res/drawable/navigation.png" />
+        <ignore path="src/main/res/drawable/new_chat.png" />
+        <ignore path="src/main/res/drawable/no_friends_found.png" />
+        <ignore path="src/main/res/drawable/nointernet.png" />
+        <ignore path="src/main/res/drawable/noresult_found.jpg" />
+        <ignore path="src/main/res/drawable/nousersfound.png" />
+        <ignore path="src/main/res/drawable/phone_call.png" />
+        <ignore path="src/main/res/drawable/plus.png" />
+        <ignore path="src/main/res/drawable/recyclerview_background.png" />
+        <ignore path="src/main/res/drawable/restart.png" />
+        <ignore path="src/main/res/drawable/restaurant_main.jpeg" />
+        <ignore path="src/main/res/drawable/restaurant_placeholder.png" />
+        <ignore path="src/main/res/drawable/reviews.png" />
+        <ignore path="src/main/res/drawable/search_marker.png" />
+        <ignore path="src/main/res/drawable/searching.png" />
+        <ignore path="src/main/res/drawable/searching.png" />
+        <ignore path="src/main/res/drawable/searching.png" />
+        <ignore path="src/main/res/drawable/send_message.png" />
+        <ignore path="src/main/res/drawable/settings.png" />
+        <ignore path="src/main/res/drawable/signin_with_google.png" />
+        <ignore path="src/main/res/drawable/star.png" />
+        <ignore path="src/main/res/drawable/start_selected.png" />
+        <ignore path="src/main/res/drawable/time.png" />
+        <ignore path="src/main/res/drawable/users_eating_here.png" />
+        <ignore path="src/main/res/drawable/work_mates.png" />
+        <ignore path="src/main/res/drawable/works_mates_selected.png" />
+        <ignore path="src/main/res/drawable/worldwide.png" />
+    </issue>
+</lint>

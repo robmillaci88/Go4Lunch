@@ -163,7 +163,7 @@ public class UsersListAdapter extends BaseAdapterClass implements
      * If the viewholders current user's ID is within the returned users Array, this user has been added and so we make UI changes to reflect this
      *
      * @param addedUsersReturned the current users added users (friends)
-     * @param viewHolder         the returned Viewholder object that we need to make UI changes to depending on the reults of @param addedUsersReturned
+     * @param viewHolder         the returned Viewholder object that we need to make UI changes to depending on the results of @param addedUsersReturned
      */
     @Override
     public void workUsersDataCallback(ArrayList<Users> addedUsersReturned, Object viewHolder) {
@@ -188,7 +188,7 @@ public class UsersListAdapter extends BaseAdapterClass implements
         final TextView username;
         final TextView userEmail;
         final ImageView userPicture;
-        public final ImageView addFriend;
+        final ImageView addFriend;
         String uniqueId;
 
         private MyviewHolder(View itemView) {

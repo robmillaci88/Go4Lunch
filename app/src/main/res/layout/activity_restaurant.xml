@@ -7,7 +7,8 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     android:fitsSystemWindows="true"
-    tools:context=".activities.RestaurantActivity">
+    tools:context=".activities.RestaurantActivity"
+    tools:ignore="Overdraw">
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/restaurant_selected"
@@ -40,7 +41,6 @@
         android:id="@+id/restaurant_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
         android:background="@color/colorPrimary"
@@ -54,7 +54,6 @@
         android:id="@+id/restaurant_address"
         android:layout_width="0dp"
         android:layout_height="40dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
         android:background="@color/colorPrimary"
@@ -120,7 +119,6 @@
         style="?android:attr/ratingBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="2dp"
         android:isIndicator="true"
@@ -162,7 +160,6 @@
         android:id="@+id/backbtn"
         android:layout_width="37dp"
         android:layout_height="38dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"

@@ -90,6 +90,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/fragment_container"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/nointernet" />
+        app:srcCompat="@drawable/nointernet"
+        android:contentDescription="@string/no_internet_image" />
 
 </android.support.constraint.ConstraintLayout>

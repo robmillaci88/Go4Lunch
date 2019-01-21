@@ -3,11 +3,9 @@ package com.example.robmillaci.go4lunch.alarms_and_receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.design.widget.Snackbar;
 import android.widget.Toast;
 
 import com.example.robmillaci.go4lunch.R;
-import com.example.robmillaci.go4lunch.activities.MainActivity;
 import com.example.robmillaci.go4lunch.utils.NetworkInfoChecker;
 
 /**
@@ -18,7 +16,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
         if (!NetworkInfoChecker.isNetworkAvailable(context)) {
-            Toast.makeText(context, R.string.no_internet,Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.no_internet, Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -63,7 +63,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        setTitle(getString(R.string.main_title)); //Sets the title of this activty
+        setTitle(getString(R.string.main_title)); //Sets the title of this activity
 
         ImageView noInternetImage = findViewById(R.id.no_internet_image);
         Button tryAgainButton = findViewById(R.id.try_again_button);

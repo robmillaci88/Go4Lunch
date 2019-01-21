@@ -1,6 +1,7 @@
 //noinspection GradleCompatible
 //noinspection GradleCompatible
 
+
 apply plugin: 'com.android.application'
 
 android {
@@ -49,7 +50,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:16.0.0"
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.google.firebase:firebase-database:16.0.5'
-    implementation 'com.google.firebase:firebase-firestore:17.1.4'
+    implementation 'com.google.firebase:firebase-firestore:17.1.5'
     implementation('com.google.api-client:google-api-client-android:1.20.0') {
         exclude module: 'guava-jdk5'
     }

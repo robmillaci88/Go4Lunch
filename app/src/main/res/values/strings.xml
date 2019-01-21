@@ -107,4 +107,10 @@
     <string name="no_location">Could not find your location</string>
     <string name="settings_activity_title">Settings</string>
     <string name="no_internet">No internet available</string>
+    <string name="nav_bar_name">nav bar name</string>
+    <string name="default_places_search_zoom">Default places search zoom</string>
+    <string name="default_map_zoom">Default map zoom</string>
+    <string name="no_internet_image">no internet image</string>
+    <string name="no_liked_places_found">no liked places found</string>
+    <string name="places_search">places search</string>
 </resources>

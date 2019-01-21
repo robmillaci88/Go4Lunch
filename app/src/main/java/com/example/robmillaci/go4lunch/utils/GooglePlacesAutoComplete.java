@@ -15,7 +15,7 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
  * see {@link PlaceAutocomplete}
  */
 public class GooglePlacesAutoComplete extends Activity {
-    public static int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+    public static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
 
     public void createAutoCompleteSearch(GoogleMapsFragment mFragment) {
         //noinspection TryWithIdenticalCatches

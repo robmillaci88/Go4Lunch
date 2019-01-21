@@ -55,7 +55,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDownloadedCallback,
         Filterable {
 
-    private final LatLng mCurrentLocation; //the current location of the user, used to determin the distance to the restaurant
+    private final LatLng mCurrentLocation; //the current location of the user, used to determine the distance to the restaurant
     private final Context mContext;
 
     private ArrayList<PojoPlace> mPojoPlaceArray; //List of places (restaurants) to display to the user
@@ -149,7 +149,7 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
         });
 
 
-        //set the onclick listener for the recyclerviews item. This will call the RestaurantActivity for the specific pojoPlace
+        //set the onclick listener for the recyclerview item. This will call the RestaurantActivity for the specific pojoPlace
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -233,7 +233,7 @@ public class RestaurantListAdapter extends BaseAdapterClass implements IphotoDow
                                         thursday.setText(weekdayText.get(3)); //set the text for thursday opening hours
                                         friday.setText(weekdayText.get(4)); //set the text for friday opening hours
                                         saturday.setText(weekdayText.get(5)); //set the text for saturday opening hours
-                                        sunday.setText(weekdayText.get(6)); //set the text for sundau opening hours
+                                        sunday.setText(weekdayText.get(6)); //set the text for sunday opening hours
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                         Toast.makeText(getApplicationContext(), R.string.error_getting_times, Toast.LENGTH_LONG).show();

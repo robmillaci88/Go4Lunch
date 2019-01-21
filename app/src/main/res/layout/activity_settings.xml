@@ -35,7 +35,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Default map zoom"
+        android:text="@string/default_map_zoom"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -49,7 +49,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
-        android:text="Default places search zoom"
+        android:text="@string/default_places_search_zoom"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -62,7 +62,6 @@
         android:layout_height="36dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
-        android:text="18"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView6" />
@@ -73,7 +72,6 @@
         android:layout_height="36dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
-        android:text="13"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />

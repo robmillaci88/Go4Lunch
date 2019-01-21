@@ -17,7 +17,7 @@ import com.example.robmillaci.go4lunch.R;
 import com.example.robmillaci.go4lunch.activities.MainActivity;
 
 /**
- * Recieves a broadcast from {@link Alarm} and on receipt, creates and launches a notification
+ * Receives a broadcast from {@link Alarm} and on receipt, creates and launches a notification
  */
 public class Notifications extends BroadcastReceiver {
     public static final String PLACE_NAME = "placename";
@@ -38,7 +38,7 @@ public class Notifications extends BroadcastReceiver {
     }
 
 
-    public static void createNotification(Context mContext, String placeName, Bitmap placeImage, String placeAddress, String[] usersEating) {
+    private static void createNotification(Context mContext, String placeName, Bitmap placeImage, String placeAddress, String[] usersEating) {
         StringBuilder sb = new StringBuilder();
 
         if (usersEating != null && usersEating.length > 0) {

@@ -14,7 +14,4 @@ public class RawData {
         return response;
     }
 
-    public void setResponse(Response response) {
-        this.response = response;
-    }
 }
