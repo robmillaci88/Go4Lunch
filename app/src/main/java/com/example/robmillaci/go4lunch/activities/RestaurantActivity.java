@@ -328,15 +328,21 @@ public class RestaurantActivity extends BaseActivity implements IphotoDownloaded
     @Override
     public void workUsersDataCallback(ArrayList<Users> users, Object o) {
         //now we have the added friends ID's we can check if any of them have selected this place
-        String[] usersIds = new String[users.size() + 1];
-        for (int i = 0; i < users.size(); i++) {
-            usersIds[i] = users.get(i).getUserID();
+        if(users != null) {
+            String[] usersIds = new String[users.size() + 1];
+            for (int i = 0; i < users.size(); i++) {
+                usersIds[i] = users.get(i).getUserID();
+            }
+
+            //we need to add the current users ID here as this is filtered out in the firebase searches
+            usersIds[users.size()] = FirebaseHelper.getmCurrentUserId();
+            firebaseHelper.isPlaceSelected(placeID, usersIds);
+
+        }else {
+            String[] usersIds = new String[1];
+            usersIds[0] = FirebaseHelper.getmCurrentUserId();
+            firebaseHelper.isPlaceSelected(placeID, usersIds);
         }
-
-        //we need to add the current users ID here as this is filtered out in the firebase searches
-        usersIds[users.size()] = FirebaseHelper.getmCurrentUserId();
-
-        firebaseHelper.isPlaceSelected(placeID, usersIds);
     }
 
 

@@ -92,5 +92,19 @@
     <string name="error_getting_details">Error al obtener algunos detalles del lugar, por favor revise su red</string>
     <string name="no_place_selected_yet">Aún no has elegido un lugar para comer!</string>
     <string name="marker_already_added">Este marcador ya se ha añadido al mapa.</string>
-
+    <string name="account_email_clash">Ya existe una cuenta con este correo electrónico con un proveedor diferente.</string>
+    <string name="sign_in_cancel">registrarse cancelado</string>
+    <string name="auth_error">error de autenticación</string>
+    <string name="com.twitter.sdk.android.CONSUMER_KEY">GZqKO4C89x8xwadelwZtz9EF3</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET">rq385i4DhG0InVieBLvY9jc24ztdR2g5okMLvBAiupl7YLiyC1</string>
+    <string name="no_location">No se pudo encontrar tu ubicación</string>
+    <string name="settings_activity_title">Ajustes</string>
+    <string name="no_internet">No hay internet disponible</string>
+    <string name="nav_bar_name">nombre de la barra de navegación</string>
+    <string name="default_places_search_zoom">Lugares por defecto buscar zoom</string>
+    <string name="default_map_zoom">Zoom de mapa predeterminado</string>
+    <string name="no_internet_image">ninguna imagen de internet</string>
+    <string name="no_liked_places_found">No se han encontrado lugares favoritos</string>
+    <string name="places_search">lugares de búsqueda</string>
+    <string name="login_failed">error de inicio de sesion</string>
 </resources>

@@ -113,4 +113,5 @@
     <string name="no_internet_image">no internet image</string>
     <string name="no_liked_places_found">no liked places found</string>
     <string name="places_search">places search</string>
+    <string name="login_failed">Login failed</string>
 </resources>

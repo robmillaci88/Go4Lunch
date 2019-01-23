@@ -27,6 +27,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -150,12 +151,11 @@ public class StartActivity extends AppCompatActivity {
             @Override
             public void success(Result<TwitterSession> result) {
                 handleTwitterSession(result.data);
-                Toast.makeText(getApplicationContext(), "Email address is not available with twitter sign in", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void failure(TwitterException exception) {
-                Toast.makeText(getApplicationContext(), "Login failed", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), R.string.login_failed, Toast.LENGTH_LONG).show();
                 updateUI(null);
             }
         });
@@ -278,7 +278,12 @@ public class StartActivity extends AppCompatActivity {
                             }
                         }
                     }
-                });
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(StartActivity.this,e.getMessage(),Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
 
@@ -321,7 +326,6 @@ public class StartActivity extends AppCompatActivity {
      * Once the user has been authenticated, log in and added to the database. launch the MainActivity
      */
     private void updateUI(FirebaseUser user) {
-        Log.d(TAG, "updateUI: called with user " + user);
         if (user != null) {
             Intent launchMain = new Intent(this, MainActivity.class);
             loggedInUser = mAuth.getCurrentUser().getDisplayName();

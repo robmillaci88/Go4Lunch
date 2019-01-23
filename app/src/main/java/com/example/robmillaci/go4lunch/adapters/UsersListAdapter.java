@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.auth.User;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -117,9 +118,8 @@ public class UsersListAdapter extends BaseAdapterClass implements
 
     @Override
     public int getItemCount() {
-        return mUsersArrayList.size();
+        return mUsersArrayList == null ? 0 : mUsersArrayList.size();
     }
-
 
     @Override
     public Filter getFilter() {
@@ -128,16 +128,23 @@ public class UsersListAdapter extends BaseAdapterClass implements
             protected FilterResults performFiltering(CharSequence constraint) {
                 String charString = constraint.toString();
                 if (charString.isEmpty()) {
-                    filteredUsersList = originalArray; //if no text is entered in the search box, set the filteredUserList to the original
+                    filteredUsersList = originalArray;
                 } else {
-                    ArrayList<Object> queryfilteredList = new ArrayList<>(); //create a new arraylist to hold the filtered results
-                    for (Object row : originalArray) { //loop through each object in the originalArray
-                        // here we are looking for a match on the uses username or email
-                        if (((Users) row).getUsername().toLowerCase().contains(charString.toLowerCase())
-                                || ((Users) row).getUserEmail().toLowerCase().contains(charString.toLowerCase())) {
-                            queryfilteredList.add(row); //if the condition is med, add the user to the filtered array list
+                    ArrayList<Object> queryfilteredList = new ArrayList<>();
+                    for (Object userObj : originalArray) {
+                        Users row = (Users)userObj;
+                        Log.d("filtercheck", "performFiltering: charstring is  " + charString.toLowerCase());
+
+                        Log.d("filtercheck", "performFiltering: user name is " + row.getUsername());
+                        Log.d("filtercheck", "performFiltering: user name is " + row.getUserEmail());
+
+
+                        // name match condition. if the username or user email matches the filter constraint
+                            if (row.getUsername().toLowerCase().contains(charString.toLowerCase()) || row.getUserEmail().toLowerCase().contains(charString.toLowerCase())) {
+                                Log.d("performFiltering", "performFiltering: added user " + row.getUsername());
+                                queryfilteredList.add(row);
+                            }
                         }
-                    }
 
                     filteredUsersList = queryfilteredList;
                 }
@@ -146,6 +153,7 @@ public class UsersListAdapter extends BaseAdapterClass implements
                 return filterResults;
 
             }
+
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
@@ -158,6 +166,8 @@ public class UsersListAdapter extends BaseAdapterClass implements
     }
 
 
+
+
     /**
      * called after {@link FirebaseHelper#createUserObjects(ArrayList, Object)}
      * If the viewholders current user's ID is within the returned users Array, this user has been added and so we make UI changes to reflect this
@@ -167,7 +177,6 @@ public class UsersListAdapter extends BaseAdapterClass implements
      */
     @Override
     public void workUsersDataCallback(ArrayList<Users> addedUsersReturned, Object viewHolder) {
-        Log.d("work user data callback", "workUsersDataCallback: added users returned is " + addedUsersReturned);
         if (viewHolder != null) {
             MyviewHolder myviewHolder = (MyviewHolder) viewHolder;
 
