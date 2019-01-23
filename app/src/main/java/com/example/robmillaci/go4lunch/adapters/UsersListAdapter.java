@@ -133,15 +133,8 @@ public class UsersListAdapter extends BaseAdapterClass implements
                     ArrayList<Object> queryfilteredList = new ArrayList<>();
                     for (Object userObj : originalArray) {
                         Users row = (Users)userObj;
-                        Log.d("filtercheck", "performFiltering: charstring is  " + charString.toLowerCase());
-
-                        Log.d("filtercheck", "performFiltering: user name is " + row.getUsername());
-                        Log.d("filtercheck", "performFiltering: user name is " + row.getUserEmail());
-
-
                         // name match condition. if the username or user email matches the filter constraint
                             if (row.getUsername().toLowerCase().contains(charString.toLowerCase()) || row.getUserEmail().toLowerCase().contains(charString.toLowerCase())) {
-                                Log.d("performFiltering", "performFiltering: added user " + row.getUsername());
                                 queryfilteredList.add(row);
                             }
                         }
@@ -151,7 +144,6 @@ public class UsersListAdapter extends BaseAdapterClass implements
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = filteredUsersList;
                 return filterResults;
-
             }
 
 
